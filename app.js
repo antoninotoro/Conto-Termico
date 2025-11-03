@@ -76,6 +76,15 @@ function mostraFormIntervento() {
         case 'A5':
             formHTML = getFormA5();
             break;
+        case 'A6':
+            formHTML = getFormA6();
+            break;
+        case 'A7':
+            formHTML = getFormA7();
+            break;
+        case 'A8':
+            formHTML = getFormA8();
+            break;
         case 'B1':
             formHTML = getFormB1();
             break;
@@ -87,6 +96,15 @@ function mostraFormIntervento() {
             break;
         case 'B4':
             formHTML = getFormB4();
+            break;
+        case 'B5':
+            formHTML = getFormB5();
+            break;
+        case 'B6':
+            formHTML = getFormB6();
+            break;
+        case 'B7':
+            formHTML = getFormB7();
             break;
     }
 
@@ -245,8 +263,73 @@ function getFormA2() {
     `;
 }
 
-// Form A.3 - Trasformazione NZEB
+// Form A.3 - Schermature Solari e Sistemi Filtrazione
 function getFormA3() {
+    return `
+        <h3>A.3 - Schermature Solari e Sistemi di Filtrazione</h3>
+
+        <div class="warning">
+            <strong>Condizione Obbligatoria:</strong> Incentivato esclusivamente se abbinato all'intervento di
+            sostituzione delle chiusure trasparenti (Art. 5, lett. b).
+        </div>
+
+        <div class="info">
+            <strong>Requisiti Tecnici:</strong>
+            <ul style="margin: 10px 0 0 20px;">
+                <li>Prestazione Schermatura: Classe 3 o superiore (UNI EN 14501)</li>
+                <li>Meccanismi Automatici: Basati su rilevazione radiazione solare (UNI EN 15232)</li>
+                <li>Sistemi Filtrazione: Fattore solare g<sub>tot</sub> nel range classe 3 o 4</li>
+            </ul>
+        </div>
+
+        <div class="form-group">
+            <label>Tipologia:</label>
+            <select id="tipoSchermatura">
+                <option value="schermatura">Schermature Solari</option>
+                <option value="filtrazione">Sistemi di Filtrazione</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Superficie schermata (m²):</label>
+                <input type="number" id="superficie" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label>Costo specifico sostenuto (€/m²):</label>
+                <input type="number" id="costoSpecifico" min="0" step="0.01" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Spesa totale sostenuta (€):</label>
+            <input type="number" id="spesaTotale" min="0" step="0.01" required>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="abbinamentoInfissi" required>
+            <label for="abbinamentoInfissi">Abbinato a sostituzione chiusure trasparenti (obbligatorio)</label>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="classe3" required>
+            <label for="classe3">Classe 3 o superiore (UNI EN 14501) - Obbligatorio</label>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="automatico" required>
+            <label for="automatico">Meccanismi automatici con rilevazione radiazione solare - Obbligatorio</label>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="prodottoUE">
+            <label for="prodottoUE">Componenti prodotti in UE (+10%)</label>
+        </div>
+    `;
+}
+
+// Form A.4 - Trasformazione NZEB
+function getFormA4() {
     return `
         <h3>A.3 - Trasformazione in Edificio a Energia Quasi Zero (NZEB)</h3>
 
@@ -295,8 +378,83 @@ function getFormA3() {
     `;
 }
 
-// Form A.4 - Building Automation
-function getFormA4() {
+// Form A.5 - Sostituzione Sistemi Illuminazione
+function getFormA5() {
+    return `
+        <h3>A.5 - Sostituzione di Sistemi per l'Illuminazione</h3>
+
+        <div class="info">
+            <strong>Requisiti Tecnici:</strong>
+            <ul style="margin: 10px 0 0 20px;">
+                <li>Indice di Resa Cromatica (CRI): >80 (interni); >60 (esterni)</li>
+                <li>Efficienza Luminosa Minima: 80 lm/W</li>
+                <li>Potenza Installata: Non può superare il 50% della potenza sostituita</li>
+                <li>Rispetto criteri illuminotecnici (UNI EN 12464-1)</li>
+            </ul>
+        </div>
+
+        <div class="form-group">
+            <label>Ambito:</label>
+            <select id="ambitoIlluminazione">
+                <option value="interno">Illuminazione Interna</option>
+                <option value="esterno">Illuminazione Esterna/Pertinenze</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Potenza precedente sostituita (kW):</label>
+                <input type="number" id="potenzaPrecedente" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label>Potenza nuova installata (kW):</label>
+                <input type="number" id="potenzaNuova" min="0" step="0.01" required>
+                <small id="potenza-info" class="info-text" style="color: #006B68;">Max 50% della potenza precedente</small>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Efficienza luminosa (lm/W):</label>
+                <input type="number" id="efficienzaLuminosa" min="80" step="1" required>
+                <small class="info-text" style="color: #006B68;">Minimo: 80 lm/W</small>
+            </div>
+            <div class="form-group">
+                <label id="labelCRI">CRI (Indice Resa Cromatica):</label>
+                <input type="number" id="cri" min="60" step="1" required>
+                <small id="cri-info" class="info-text" style="color: #006B68;">Minimo: >80 (interni)</small>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Spesa totale sostenuta (€):</label>
+            <input type="number" id="spesaTotale" min="0" step="0.01" required>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="sostituzioneSistema" required>
+            <label for="sostituzioneSistema">Sostituzione di sistema esistente (obbligatorio)</label>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="prodottoUE">
+            <label for="prodottoUE">Componenti prodotti in UE (+10%)</label>
+        </div>
+
+        <script>
+            document.getElementById('ambitoIlluminazione').addEventListener('change', function() {
+                const ambito = this.value;
+                const criMin = ambito === 'interno' ? 80 : 60;
+                document.getElementById('cri').min = criMin;
+                document.getElementById('cri-info').innerHTML =
+                    '<span style="color: #006B68;">Minimo: >' + criMin + ' (' + ambito + ')</span>';
+            });
+        </script>
+    `;
+}
+
+// Form A.6 - Building Automation
+function getFormA6() {
     return `
         <h3>A.4 - Building Automation</h3>
 
@@ -333,8 +491,66 @@ function getFormA4() {
     `;
 }
 
-// Form A.5 - Fotovoltaico e Accumulo
-function getFormA5() {
+// Form A.7 - Colonnine Ricarica Veicoli Elettrici
+function getFormA7() {
+    return `
+        <h3>A.7 - Installazione di Colonnine di Ricarica per Veicoli Elettrici</h3>
+
+        <div class="warning">
+            <strong>Condizioni Obbligatorie:</strong>
+            <ul style="margin: 10px 0 0 20px;">
+                <li>Deve essere realizzata congiuntamente alla sostituzione di impianti di climatizzazione invernale con pompe di calore elettriche</li>
+                <li>Potenza Minima Erogabile: 7,4 kW</li>
+                <li>Tipologia: Deve essere di tipologia "smart" (misurare, registrare e trasmettere potenza attiva)</li>
+                <li>Modalità di Ricarica: Modo 3 o Modo 4 (norma CEI EN 61851)</li>
+            </ul>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Numero colonnine:</label>
+                <input type="number" id="numeroColonnine" min="1" step="1" required>
+            </div>
+            <div class="form-group">
+                <label>Potenza erogabile per colonnina (kW):</label>
+                <input type="number" id="potenzaColonnina" min="7.4" step="0.1" required>
+                <small class="info-text" style="color: #006B68;">Minimo: 7,4 kW</small>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Modalità ricarica:</label>
+                <select id="modalitaRicarica">
+                    <option value="modo3">Modo 3 (CEI EN 61851)</option>
+                    <option value="modo4">Modo 4 (CEI EN 61851)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Costo per colonnina (€):</label>
+                <input type="number" id="costoColonnina" min="0" step="0.01" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Spesa totale sostenuta (€):</label>
+            <input type="number" id="spesaTotale" min="0" step="0.01" required>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="abbinamentoPC" required>
+            <label for="abbinamentoPC">Abbinato a sostituzione impianto con pompa di calore elettrica (obbligatorio)</label>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="smart" required>
+            <label for="smart">Colonnine "smart" con funzionalità di misura, registrazione e trasmissione (obbligatorio)</label>
+        </div>
+    `;
+}
+
+// Form A.8 - Fotovoltaico e Accumulo
+function getFormA8() {
     return `
         <h3>A.5 - Fotovoltaico e Accumulo</h3>
 
@@ -534,8 +750,147 @@ function getFormB2() {
     `;
 }
 
-// Form B.3 - Scaldacqua a Pompa di Calore
+// Form B.3 - Generatori di Calore a Biomassa
 function getFormB3() {
+    return `
+        <h3>B.3 - Generatori di Calore a Biomassa</h3>
+
+        <div class="warning">
+            <strong>Requisiti Obbligatori:</strong>
+            <ul style="margin: 10px 0 0 20px;">
+                <li>Sostituzione di generatori a biomassa, carbone, olio combustibile o gasolio</li>
+                <li>Certificazione Ambientale: 5 stelle o superiore (DM 186/2017)</li>
+                <li>Manutenzione biennale obbligatoria (generatore e canna fumaria) per tutta la durata dell'incentivo</li>
+                <li>Caldaie ≤500 kWt: Conformità UNI EN 303-5, Classe 5</li>
+                <li>Rendimento termico utile ≥87%+log(Pn)</li>
+                <li>Accumulo termico ≥20 dm³/kWt</li>
+                <li>Utilizzo pellet certificato UNI EN ISO 17225-2</li>
+            </ul>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Potenza nominale (kWt):</label>
+                <input type="number" id="potenza" min="0" step="0.1" required>
+            </div>
+            <div class="form-group">
+                <label>Rendimento termico utile (%):</label>
+                <input type="number" id="rendimento" min="0" step="0.1" required>
+                <small id="rend-info" class="info-text" style="color: #006B68;"></small>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Certificazione ambientale (stelle):</label>
+                <select id="certificazione">
+                    <option value="5">5 stelle</option>
+                    <option value="5+">5+ stelle</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Accumulo termico (dm³/kWt):</label>
+                <input type="number" id="accumulo" min="20" step="1" required>
+                <small class="info-text" style="color: #006B68;">Minimo: 20 dm³/kWt</small>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Spesa totale sostenuta (€):</label>
+            <input type="number" id="spesaTotale" min="0" step="0.01" required>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="sostituzioneImpianto" required>
+            <label for="sostituzioneImpianto">Sostituzione di impianto esistente (obbligatorio)</label>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="pelletCertificato" required>
+            <label for="pelletCertificato">Utilizzo pellet certificato UNI EN ISO 17225-2 (obbligatorio)</label>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="classe5" required>
+            <label for="classe5">Conforme UNI EN 303-5, Classe 5 (obbligatorio per ≤500 kWt)</label>
+        </div>
+
+        <script>
+            document.getElementById('potenza').addEventListener('input', function() {
+                const potenza = parseFloat(this.value) || 1;
+                const rendMin = 87 + Math.log10(potenza);
+                document.getElementById('rend-info').innerHTML =
+                    '<span style="color: #006B68;">Minimo: ' + rendMin.toFixed(1) + '% (87+log(Pn))</span>';
+            });
+        </script>
+    `;
+}
+
+// Form B.4 - Impianti Solari Termici e Solar Cooling
+function getFormB4() {
+    return `
+        <h3>B.4 - Impianti Solari Termici e Solar Cooling</h3>
+
+        <div class="info">
+            <strong>Requisiti Tecnici:</strong>
+            <ul style="margin: 10px 0 0 20px;">
+                <li>Collettori: Certificazione Solar Keymark</li>
+                <li>Producibilità Minima (es. collettori piani >300 kWht/m²·anno)</li>
+                <li>Garanzie: Collettori e bollitori garantiti per almeno 5 anni</li>
+                <li>Solar Cooling: Rapporto Sup. Solare/kWf tra 2 e 2,75</li>
+            </ul>
+        </div>
+
+        <div class="form-group">
+            <label>Tipologia Impianto:</label>
+            <select id="tipoImpianto">
+                <option value="acs">Produzione ACS</option>
+                <option value="integrazione">Integrazione riscaldamento</option>
+                <option value="solare_cooling">Solar Cooling</option>
+                <option value="processi">Processi produttivi</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Tipo Collettori:</label>
+            <select id="tipoCollettori">
+                <option value="piani">Collettori Piani</option>
+                <option value="sottovuoto">Collettori Sottovuoto</option>
+                <option value="concentrazione">Collettori a Concentrazione</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Superficie lorda collettori (m²):</label>
+                <input type="number" id="superficieCollettori" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label>Producibilità specifica (kWht/m²·anno):</label>
+                <input type="number" id="producibilita" min="300" step="1" required>
+                <small class="info-text" style="color: #006B68;">Minimo: 300 kWht/m²·anno (piani)</small>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Spesa totale sostenuta (€):</label>
+            <input type="number" id="spesaTotale" min="0" step="0.01" required>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="solarKeymark" required>
+            <label for="solarKeymark">Certificazione Solar Keymark (obbligatorio)</label>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="garanzia5anni" required>
+            <label for="garanzia5anni">Garanzia collettori e bollitori 5 anni (obbligatorio)</label>
+        </div>
+    `;
+}
+
+// Form B.5 - Scaldacqua a Pompa di Calore
+function getFormB5() {
     return `
         <h3>B.3 - Scaldacqua a Pompa di Calore</h3>
 
@@ -571,8 +926,8 @@ function getFormB3() {
     `;
 }
 
-// Form B.4 - Allaccio a Teleriscaldamento
-function getFormB4() {
+// Form B.6 - Allaccio a Teleriscaldamento
+function getFormB6() {
     return `
         <h3>B.4 - Allaccio a Teleriscaldamento Efficiente</h3>
 
@@ -609,6 +964,66 @@ function getFormB4() {
     `;
 }
 
+// Form B.7 - Microcogenerazione da Fonti Rinnovabili
+function getFormB7() {
+    return `
+        <h3>B.7 - Microcogenerazione alimentata da Fonti Rinnovabili</h3>
+
+        <div class="warning">
+            <strong>Requisiti Obbligatori:</strong>
+            <ul style="margin: 10px 0 0 20px;">
+                <li>Sostituzione totale o parziale di impianti esistenti</li>
+                <li>Risparmio Energetico Primario (PES): Almeno pari al 10%</li>
+                <li>Potenza Elettrica: Microcogeneratore <50 kWe</li>
+                <li>Alimentazione: Esclusivamente da fonti rinnovabili (biomassa, biogas, bioliquidi)</li>
+            </ul>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Potenza elettrica (kWe):</label>
+                <input type="number" id="potenzaElettrica" min="0" max="50" step="0.1" required>
+                <small class="info-text" style="color: #006B68;">Massimo: 50 kWe</small>
+            </div>
+            <div class="form-group">
+                <label>Potenza termica (kWt):</label>
+                <input type="number" id="potenzaTermica" min="0" step="0.1" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Fonte rinnovabile:</label>
+                <select id="fonteRinnovabile">
+                    <option value="biomassa">Biomassa</option>
+                    <option value="biogas">Biogas</option>
+                    <option value="bioliquidi">Bioliquidi</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>PES - Risparmio Energetico Primario (%):</label>
+                <input type="number" id="pes" min="10" step="0.1" required>
+                <small class="info-text" style="color: #006B68;">Minimo: 10%</small>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Spesa totale sostenuta (€):</label>
+            <input type="number" id="spesaTotale" min="0" step="0.01" required>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="sostituzioneImpianto" required>
+            <label for="sostituzioneImpianto">Sostituzione totale o parziale di impianto esistente (obbligatorio)</label>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="fontiRinnovabiliEsclusive" required>
+            <label for="fontiRinnovabiliEsclusive">Alimentazione esclusiva da fonti rinnovabili (obbligatorio)</label>
+        </div>
+    `;
+}
+
 // Funzione principale di calcolo
 function calcolaIncentivo() {
     if (!interventoSelezionato) {
@@ -635,6 +1050,15 @@ function calcolaIncentivo() {
             case 'A5':
                 risultato = calcolaA5();
                 break;
+            case 'A6':
+                risultato = calcolaA6();
+                break;
+            case 'A7':
+                risultato = calcolaA7();
+                break;
+            case 'A8':
+                risultato = calcolaA8();
+                break;
             case 'B1':
                 risultato = calcolaB1();
                 break;
@@ -646,6 +1070,15 @@ function calcolaIncentivo() {
                 break;
             case 'B4':
                 risultato = calcolaB4();
+                break;
+            case 'B5':
+                risultato = calcolaB5();
+                break;
+            case 'B6':
+                risultato = calcolaB6();
+                break;
+            case 'B7':
+                risultato = calcolaB7();
                 break;
         }
 
@@ -797,8 +1230,69 @@ function calcolaA2() {
     };
 }
 
-// Calcolo A.3 - Trasformazione NZEB
+// Calcolo A.3 - Schermature Solari
 function calcolaA3() {
+    const superficie = parseFloat(document.getElementById('superficie').value);
+    const costoSpecifico = parseFloat(document.getElementById('costoSpecifico').value);
+    const spesaTotale = parseFloat(document.getElementById('spesaTotale').value);
+    const abbinamentoInfissi = document.getElementById('abbinamentoInfissi').checked;
+    const classe3 = document.getElementById('classe3').checked;
+    const automatico = document.getElementById('automatico').checked;
+    const prodottoUE = document.getElementById('prodottoUE').checked;
+
+    if (!abbinamentoInfissi) {
+        throw new Error('Abbinamento a sostituzione chiusure trasparenti è obbligatorio');
+    }
+
+    if (!classe3) {
+        throw new Error('Classe 3 o superiore (UNI EN 14501) è obbligatoria');
+    }
+
+    if (!automatico) {
+        throw new Error('Meccanismi automatici con rilevazione radiazione solare sono obbligatori');
+    }
+
+    // % spesa base
+    let percSpesa = 0.40;
+    if (prodottoUE) {
+        percSpesa += 0.10;
+    }
+
+    // Calcolo incentivo teorico
+    const incentivoTeorico = percSpesa * costoSpecifico * superficie;
+
+    // Applicazione vincoli
+    const Imax = 200000; // € (stima)
+    const limite65 = spesaTotale * 0.65;
+
+    const incentivoFinale = Math.min(incentivoTeorico, Imax, limite65);
+
+    const vincoloApplicato =
+        incentivoFinale === Imax ? 'Imax (200.000 €)' :
+        incentivoFinale === limite65 ? '65% spesa sostenuta' :
+        'Nessun vincolo';
+
+    return {
+        tipo: 'A.3 - Schermature Solari',
+        incentivoTeorico: incentivoTeorico,
+        incentivoFinale: incentivoFinale,
+        vincoloApplicato: vincoloApplicato,
+        durataAnni: 2,
+        rataAnnuale: incentivoFinale / 2,
+        requisitiOK: abbinamentoInfissi && classe3 && automatico,
+        dettagli: {
+            'Superficie': superficie.toFixed(2) + ' m²',
+            'Costo specifico': costoSpecifico.toFixed(2) + ' €/m²',
+            'Spesa totale': spesaTotale.toFixed(2) + ' €',
+            '% spesa applicata': (percSpesa * 100).toFixed(0) + '%',
+            'Limite 65%': limite65.toFixed(2) + ' €'
+        },
+        warning: 'Abbinamento obbligatorio a sostituzione chiusure trasparenti.'
+    };
+}
+
+// Calcolo A.4 - Trasformazione NZEB
+function calcolaA4() {
     const zonaClimatica = document.getElementById('zonaClimatica').value;
     const superficie = parseFloat(document.getElementById('superficieEdificio').value);
     const costoSpecifico = parseFloat(document.getElementById('costoSpecifico').value);
@@ -857,8 +1351,80 @@ function calcolaA3() {
     };
 }
 
-// Calcolo A.4 - Building Automation
-function calcolaA4() {
+// Calcolo A.5 - Illuminazione
+function calcolaA5() {
+    const potenzaPrecedente = parseFloat(document.getElementById('potenzaPrecedente').value);
+    const potenzaNuova = parseFloat(document.getElementById('potenzaNuova').value);
+    const efficienzaLuminosa = parseFloat(document.getElementById('efficienzaLuminosa').value);
+    const cri = parseFloat(document.getElementById('cri').value);
+    const spesaTotale = parseFloat(document.getElementById('spesaTotale').value);
+    const sostituzioneSistema = document.getElementById('sostituzioneSistema').checked;
+    const prodottoUE = document.getElementById('prodottoUE').checked;
+    const ambitoIlluminazione = document.getElementById('ambitoIlluminazione').value;
+
+    if (!sostituzioneSistema) {
+        throw new Error('Sostituzione di sistema esistente è obbligatoria');
+    }
+
+    // Verifica potenza max 50%
+    if (potenzaNuova > (potenzaPrecedente * 0.5)) {
+        throw new Error(`Potenza installata (${potenzaNuova} kW) supera il 50% della potenza sostituita (max ${(potenzaPrecedente * 0.5).toFixed(2)} kW)`);
+    }
+
+    // Verifica efficienza minima
+    if (efficienzaLuminosa < 80) {
+        throw new Error('Efficienza luminosa deve essere almeno 80 lm/W');
+    }
+
+    // Verifica CRI minimo
+    const criMin = ambitoIlluminazione === 'interno' ? 80 : 60;
+    if (cri < criMin) {
+        throw new Error(`CRI (${cri}) inferiore al minimo richiesto (>${criMin} per ${ambitoIlluminazione})`);
+    }
+
+    // % spesa base
+    let percSpesa = 0.40;
+    if (prodottoUE) {
+        percSpesa += 0.10;
+    }
+
+    // Calcolo incentivo teorico
+    const incentivoTeorico = percSpesa * spesaTotale;
+
+    // Applicazione vincoli
+    const Imax = 150000; // € (stima)
+    const limite65 = spesaTotale * 0.65;
+
+    const incentivoFinale = Math.min(incentivoTeorico, Imax, limite65);
+
+    const vincoloApplicato =
+        incentivoFinale === Imax ? 'Imax (150.000 €)' :
+        incentivoFinale === limite65 ? '65% spesa sostenuta' :
+        'Nessun vincolo';
+
+    return {
+        tipo: 'A.5 - Sostituzione Sistemi Illuminazione',
+        incentivoTeorico: incentivoTeorico,
+        incentivoFinale: incentivoFinale,
+        vincoloApplicato: vincoloApplicato,
+        durataAnni: 2,
+        rataAnnuale: incentivoFinale / 2,
+        requisitiOK: sostituzioneSistema && efficienzaLuminosa >= 80 && cri >= criMin && potenzaNuova <= (potenzaPrecedente * 0.5),
+        dettagli: {
+            'Ambito': ambitoIlluminazione,
+            'Potenza precedente': potenzaPrecedente.toFixed(2) + ' kW',
+            'Potenza nuova': potenzaNuova.toFixed(2) + ' kW (max ' + (potenzaPrecedente * 0.5).toFixed(2) + ' kW)',
+            'Efficienza luminosa': efficienzaLuminosa + ' lm/W (min: 80)',
+            'CRI': cri + ' (min: >' + criMin + ')',
+            'Spesa totale': spesaTotale.toFixed(2) + ' €',
+            '% spesa applicata': (percSpesa * 100).toFixed(0) + '%',
+            'Limite 65%': limite65.toFixed(2) + ' €'
+        }
+    };
+}
+
+// Calcolo A.6 - Building Automation
+function calcolaA6() {
     const superficie = parseFloat(document.getElementById('superficieEdificio').value);
     const costoSpecifico = parseFloat(document.getElementById('costoSpecifico').value);
     const spesaTotale = parseFloat(document.getElementById('spesaTotale').value);
@@ -914,8 +1480,64 @@ function calcolaA4() {
     };
 }
 
-// Calcolo A.5 - Fotovoltaico e Accumulo
-function calcolaA5() {
+// Calcolo A.7 - Colonnine Ricarica
+function calcolaA7() {
+    const numeroColonnine = parseFloat(document.getElementById('numeroColonnine').value);
+    const potenzaColonnina = parseFloat(document.getElementById('potenzaColonnina').value);
+    const costoColonnina = parseFloat(document.getElementById('costoColonnina').value);
+    const spesaTotale = parseFloat(document.getElementById('spesaTotale').value);
+    const abbinamentoPC = document.getElementById('abbinamentoPC').checked;
+    const smart = document.getElementById('smart').checked;
+
+    if (!abbinamentoPC) {
+        throw new Error('Abbinamento a sostituzione impianto con pompa di calore elettrica è obbligatorio');
+    }
+
+    if (!smart) {
+        throw new Error('Colonnine "smart" con funzionalità di misura, registrazione e trasmissione sono obbligatorie');
+    }
+
+    if (potenzaColonnina < 7.4) {
+        throw new Error('Potenza erogabile deve essere almeno 7,4 kW');
+    }
+
+    // Calcolo incentivo semplificato (40% della spesa)
+    const percSpesa = 0.40;
+    const incentivoTeorico = percSpesa * spesaTotale;
+
+    // Vincoli
+    const Imax = 100000; // € (stima)
+    const limite65 = spesaTotale * 0.65;
+
+    const incentivoFinale = Math.min(incentivoTeorico, Imax, limite65);
+
+    const vincoloApplicato =
+        incentivoFinale === Imax ? 'Imax (100.000 €)' :
+        incentivoFinale === limite65 ? '65% spesa sostenuta' :
+        'Nessun vincolo';
+
+    return {
+        tipo: 'A.7 - Colonnine Ricarica Veicoli Elettrici',
+        incentivoTeorico: incentivoTeorico,
+        incentivoFinale: incentivoFinale,
+        vincoloApplicato: vincoloApplicato,
+        durataAnni: 2,
+        rataAnnuale: incentivoFinale / 2,
+        requisitiOK: abbinamentoPC && smart && potenzaColonnina >= 7.4,
+        dettagli: {
+            'Numero colonnine': numeroColonnine,
+            'Potenza per colonnina': potenzaColonnina.toFixed(1) + ' kW (min: 7,4 kW)',
+            'Costo per colonnina': costoColonnina.toFixed(2) + ' €',
+            'Spesa totale': spesaTotale.toFixed(2) + ' €',
+            '% spesa applicata': (percSpesa * 100).toFixed(0) + '%',
+            'Limite 65%': limite65.toFixed(2) + ' €'
+        },
+        warning: 'Abbinamento obbligatorio a pompa di calore elettrica. Potenza min 7,4 kW, tipologia smart, Modo 3 o 4.'
+    };
+}
+
+// Calcolo A.8 - Fotovoltaico e Accumulo
+function calcolaA8() {
     const potenzaFV = parseFloat(document.getElementById('potenzaFV').value);
     const spesaFV = parseFloat(document.getElementById('spesaFV').value);
     const capacitaAccumulo = parseFloat(document.getElementById('capacitaAccumulo').value) || 0;
@@ -1146,8 +1768,93 @@ function calcolaB2() {
     };
 }
 
-// Calcolo B.3 - Scaldacqua a Pompa di Calore
+// Calcolo B.3 - Generatori Biomassa
 function calcolaB3() {
+    const potenza = parseFloat(document.getElementById('potenza').value);
+    const rendimento = parseFloat(document.getElementById('rendimento').value);
+    const accumulo = parseFloat(document.getElementById('accumulo').value);
+    const spesaTotale = parseFloat(document.getElementById('spesaTotale').value);
+    const sostituzioneImpianto = document.getElementById('sostituzioneImpianto').checked;
+    const pelletCertificato = document.getElementById('pelletCertificato').checked;
+    const classe5 = document.getElementById('classe5').checked;
+
+    if (!sostituzioneImpianto || !pelletCertificato || !classe5) {
+        throw new Error('Tutti i requisiti obbligatori devono essere soddisfatti');
+    }
+
+    const rendMin = 87 + Math.log10(potenza);
+    if (rendimento < rendMin) {
+        throw new Error(`Rendimento ${rendimento}% inferiore al minimo ${rendMin.toFixed(1)}%`);
+    }
+
+    if (accumulo < 20) {
+        throw new Error('Accumulo termico deve essere almeno 20 dm³/kWt');
+    }
+
+    // Calcolo semplificato: 65% della spesa
+    const incentivoTeorico = 0.65 * spesaTotale;
+    const limite65 = spesaTotale * 0.65;
+    const incentivoFinale = Math.min(incentivoTeorico, limite65);
+
+    return {
+        tipo: 'B.3 - Generatori Biomassa',
+        incentivoTeorico: incentivoTeorico,
+        incentivoFinale: incentivoFinale,
+        vincoloApplicato: '65% spesa sostenuta',
+        durataAnni: 5,
+        rataAnnuale: incentivoFinale / 5,
+        requisitiOK: sostituzioneImpianto && pelletCertificato && classe5 && rendimento >= rendMin && accumulo >= 20,
+        dettagli: {
+            'Potenza': potenza.toFixed(1) + ' kWt',
+            'Rendimento': rendimento.toFixed(1) + '% (min: ' + rendMin.toFixed(1) + '%)',
+            'Accumulo': accumulo + ' dm³/kWt (min: 20)',
+            'Spesa totale': spesaTotale.toFixed(2) + ' €',
+            'Durata': '5 anni'
+        },
+        warning: 'Certificazione 5 stelle, manutenzione biennale obbligatoria, pellet certificato.'
+    };
+}
+
+// Calcolo B.4 - Solare Termico
+function calcolaB4() {
+    const superficieCollettori = parseFloat(document.getElementById('superficieCollettori').value);
+    const producibilita = parseFloat(document.getElementById('producibilita').value);
+    const spesaTotale = parseFloat(document.getElementById('spesaTotale').value);
+    const solarKeymark = document.getElementById('solarKeymark').checked;
+    const garanzia5anni = document.getElementById('garanzia5anni').checked;
+
+    if (!solarKeymark || !garanzia5anni) {
+        throw new Error('Certificazione Solar Keymark e garanzia 5 anni sono obbligatorie');
+    }
+
+    if (producibilita < 300) {
+        throw new Error('Producibilità deve essere almeno 300 kWht/m²·anno');
+    }
+
+    // Calcolo semplificato: 65% della spesa
+    const incentivoTeorico = 0.65 * spesaTotale;
+    const limite65 = spesaTotale * 0.65;
+    const incentivoFinale = Math.min(incentivoTeorico, limite65);
+
+    return {
+        tipo: 'B.4 - Impianti Solari Termici',
+        incentivoTeorico: incentivoTeorico,
+        incentivoFinale: incentivoFinale,
+        vincoloApplicato: '65% spesa sostenuta',
+        durataAnni: 2,
+        rataAnnuale: incentivoFinale / 2,
+        requisitiOK: solarKeymark && garanzia5anni && producibilita >= 300,
+        dettagli: {
+            'Superficie collettori': superficieCollettori.toFixed(2) + ' m²',
+            'Producibilità': producibilita + ' kWht/m²·anno (min: 300)',
+            'Spesa totale': spesaTotale.toFixed(2) + ' €',
+            'Durata': '2 anni'
+        }
+    };
+}
+
+// Calcolo B.5 - Scaldacqua a Pompa di Calore
+function calcolaB5() {
     const classeEnergetica = document.getElementById('classeEnergetica').value;
     const capacita = parseFloat(document.getElementById('capacita').value);
     const spesaTotale = parseFloat(document.getElementById('spesaTotale').value);
@@ -1201,8 +1908,8 @@ function calcolaB3() {
     };
 }
 
-// Calcolo B.4 - Allaccio a Teleriscaldamento
-function calcolaB4() {
+// Calcolo B.6 - Allaccio a Teleriscaldamento
+function calcolaB6() {
     const potenza = parseFloat(document.getElementById('potenza').value);
     const costoSpecifico = parseFloat(document.getElementById('costoSpecifico').value);
     const spesaTotale = parseFloat(document.getElementById('spesaTotale').value);
@@ -1255,6 +1962,51 @@ function calcolaB4() {
             'Limite 65%': limite65.toFixed(2) + ' €',
             'Durata': '5 anni'
         }
+    };
+}
+
+// Calcolo B.7 - Microcogenerazione
+function calcolaB7() {
+    const potenzaElettrica = parseFloat(document.getElementById('potenzaElettrica').value);
+    const potenzaTermica = parseFloat(document.getElementById('potenzaTermica').value);
+    const pes = parseFloat(document.getElementById('pes').value);
+    const spesaTotale = parseFloat(document.getElementById('spesaTotale').value);
+    const sostituzioneImpianto = document.getElementById('sostituzioneImpianto').checked;
+    const fontiRinnovabiliEsclusive = document.getElementById('fontiRinnovabiliEsclusive').checked;
+
+    if (!sostituzioneImpianto || !fontiRinnovabiliEsclusive) {
+        throw new Error('Tutti i requisiti obbligatori devono essere soddisfatti');
+    }
+
+    if (potenzaElettrica >= 50) {
+        throw new Error('Potenza elettrica deve essere inferiore a 50 kWe');
+    }
+
+    if (pes < 10) {
+        throw new Error('PES (Risparmio Energetico Primario) deve essere almeno 10%');
+    }
+
+    // Calcolo semplificato: 65% della spesa
+    const incentivoTeorico = 0.65 * spesaTotale;
+    const limite65 = spesaTotale * 0.65;
+    const incentivoFinale = Math.min(incentivoTeorico, limite65);
+
+    return {
+        tipo: 'B.7 - Microcogenerazione da Fonti Rinnovabili',
+        incentivoTeorico: incentivoTeorico,
+        incentivoFinale: incentivoFinale,
+        vincoloApplicato: '65% spesa sostenuta',
+        durataAnni: 5,
+        rataAnnuale: incentivoFinale / 5,
+        requisitiOK: sostituzioneImpianto && fontiRinnovabiliEsclusive && potenzaElettrica < 50 && pes >= 10,
+        dettagli: {
+            'Potenza elettrica': potenzaElettrica.toFixed(1) + ' kWe (max: 50)',
+            'Potenza termica': potenzaTermica.toFixed(1) + ' kWt',
+            'PES': pes.toFixed(1) + '% (min: 10%)',
+            'Spesa totale': spesaTotale.toFixed(2) + ' €',
+            'Durata': '5 anni'
+        },
+        warning: 'Alimentazione esclusiva da fonti rinnovabili. Risparmio energetico primario (PES) ≥ 10%.'
     };
 }
 
