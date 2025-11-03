@@ -225,6 +225,13 @@ footer {
     width: auto;
 }
 
+.info-text {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .form-row {
