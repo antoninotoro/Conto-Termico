@@ -112,6 +112,80 @@ function mostraFormIntervento() {
     calcBtn.style.display = 'block';
 }
 
+// Helper: Form Pompa di Calore per multi-intervento (con prefisso ID personalizzato)
+function getFormPompaDiCaloreAbbinata() {
+    return `
+        <div id="pdc-section" style="display:none; margin-top: 30px; padding: 20px; background: #E8F4F3; border-radius: 8px; border-left: 4px solid #00A19C;">
+            <h3 style="color: #00A19C;">Pompa di Calore Abbinata (Art. 8 - B.1)</h3>
+
+            <div class="info">
+                Compila i dati della pompa di calore per calcolare l'incentivo complessivo del multi-intervento.
+            </div>
+
+            <div class="form-group">
+                <label>Tipologia Pompa di Calore:</label>
+                <select id="pdc_tipoPDC">
+                    <option value="aria-acqua_BT">Aria-Acqua Bassa Temperatura</option>
+                    <option value="aria-acqua_MT">Aria-Acqua Media Temperatura</option>
+                    <option value="acqua-acqua">Acqua-Acqua</option>
+                    <option value="gas">Pompa a Gas</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Potenza nominale (kW):</label>
+                    <input type="number" id="pdc_potenza" min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label id="pdc_labelSCOP">SCOP (Coefficiente Prestazione Stagionale):</label>
+                    <input type="number" id="pdc_scop" min="0" step="0.01">
+                    <small id="pdc_scop-info" class="info-text"></small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Efficienza energetica riscaldamento stagionale ηs (%):</label>
+                <input type="number" id="pdc_eta_s" min="0" step="1">
+                <small id="pdc_eta-info" class="info-text"></small>
+            </div>
+
+            <div class="form-group">
+                <label>Spesa totale pompa di calore (€):</label>
+                <input type="number" id="pdc_spesaTotale" min="0" step="0.01">
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="pdc_sostituzioneImpianto">
+                <label for="pdc_sostituzioneImpianto">Sostituzione di impianto esistente (obbligatorio per B.1)</label>
+            </div>
+        </div>
+
+        <script>
+            if (document.getElementById('pdc_tipoPDC')) {
+                document.getElementById('pdc_tipoPDC').addEventListener('change', updatePDCEfficienzaInfo);
+                updatePDCEfficienzaInfo();
+            }
+
+            function updatePDCEfficienzaInfo() {
+                const tipo = document.getElementById('pdc_tipoPDC').value;
+                const req = EFFICIENZA_MIN_PDC[tipo];
+                if (tipo === 'gas') {
+                    document.getElementById('pdc_labelSCOP').textContent = 'SPER (Seasonal Primary Energy Ratio):';
+                    document.getElementById('pdc_scop-info').innerHTML =
+                        '<span style="color: #006B68;">Valore minimo: ' + req.sper + '</span>';
+                } else {
+                    document.getElementById('pdc_labelSCOP').textContent = 'SCOP (Coefficiente Prestazione Stagionale):';
+                    document.getElementById('pdc_scop-info').innerHTML =
+                        '<span style="color: #006B68;">Valore minimo: ' + req.scop + '</span>';
+                }
+                document.getElementById('pdc_eta-info').innerHTML =
+                    '<span style="color: #006B68;">Valore minimo: ' + req.eta_s + '%</span>';
+            }
+        </script>
+    `;
+}
+
 // Form A.1 - Isolamento Termico
 function getFormA1() {
     return `
@@ -168,7 +242,7 @@ function getFormA1() {
 
         <div class="checkbox-group">
             <input type="checkbox" id="multiIntervento">
-            <label for="multiIntervento">Multi-intervento con Art. 8 (maggiorazione 55%)</label>
+            <label for="multiIntervento">Multi-intervento con Art. 8 - Pompa di Calore (maggiorazione 55%)</label>
         </div>
 
         <div class="checkbox-group">
@@ -176,10 +250,13 @@ function getFormA1() {
             <label for="prodottoUE">Componenti prodotti in UE (+10%)</label>
         </div>
 
+        ${getFormPompaDiCaloreAbbinata()}
+
         <script>
             document.getElementById('zonaClimatica').addEventListener('change', updateTrasmittanzaInfo);
             document.getElementById('tipoStruttura').addEventListener('change', updateTrasmittanzaInfo);
             document.getElementById('isolamentoInterno').addEventListener('change', updateTrasmittanzaInfo);
+            document.getElementById('multiIntervento').addEventListener('change', togglePDCSection);
             updateTrasmittanzaInfo();
 
             function updateTrasmittanzaInfo() {
@@ -190,6 +267,16 @@ function getFormA1() {
                 if (interno) uMax = (uMax * 1.3).toFixed(3);
                 document.getElementById('trasmittanza-info').innerHTML =
                     '<span style="color: #006B68;">Valore massimo ammesso: ' + uMax + ' W/m²K</span>';
+            }
+
+            function togglePDCSection() {
+                const multiIntervento = document.getElementById('multiIntervento').checked;
+                const pdcSection = document.getElementById('pdc-section');
+                if (multiIntervento) {
+                    pdcSection.style.display = 'block';
+                } else {
+                    pdcSection.style.display = 'none';
+                }
             }
         </script>
     `;
@@ -533,8 +620,15 @@ function getFormA7() {
         </div>
 
         <div class="form-group">
-            <label>Spesa totale sostenuta (€):</label>
+            <label>Spesa totale colonnine (€):</label>
             <input type="number" id="spesaTotale" min="0" step="0.01" required>
+        </div>
+
+        <div class="form-group">
+            <label>Zona Climatica (per calcolo pompa di calore):</label>
+            <select id="zonaClimatica">
+                ${ZONE_CLIMATICHE.map(z => `<option value="${z}">${z}</option>`).join('')}
+            </select>
         </div>
 
         <div class="checkbox-group">
@@ -546,13 +640,29 @@ function getFormA7() {
             <input type="checkbox" id="smart" required>
             <label for="smart">Colonnine "smart" con funzionalità di misura, registrazione e trasmissione (obbligatorio)</label>
         </div>
+
+        ${getFormPompaDiCaloreAbbinata()}
+
+        <script>
+            document.getElementById('abbinamentoPC').addEventListener('change', togglePDCSectionA7);
+
+            function togglePDCSectionA7() {
+                const abbinamentoPC = document.getElementById('abbinamentoPC').checked;
+                const pdcSection = document.getElementById('pdc-section');
+                if (abbinamentoPC) {
+                    pdcSection.style.display = 'block';
+                } else {
+                    pdcSection.style.display = 'none';
+                }
+            }
+        </script>
     `;
 }
 
 // Form A.8 - Fotovoltaico e Accumulo
 function getFormA8() {
     return `
-        <h3>A.5 - Fotovoltaico e Accumulo</h3>
+        <h3>A.8 - Fotovoltaico e Accumulo</h3>
 
         <div class="warning">
             <strong>Condizioni Obbligatorie:</strong>
@@ -589,8 +699,15 @@ function getFormA8() {
         </div>
 
         <div class="form-group">
-            <label>Incentivo pompa di calore abbinata (€):</label>
-            <input type="number" id="incentivoPC" min="0" step="0.01" required>
+            <label>Zona Climatica (per calcolo pompa di calore):</label>
+            <select id="zonaClimatica">
+                ${ZONE_CLIMATICHE.map(z => `<option value="${z}">${z}</option>`).join('')}
+            </select>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="abbinamentoPC_A8" required>
+            <label for="abbinamentoPC_A8">Abbinato a sostituzione impianto con pompa di calore elettrica (obbligatorio)</label>
         </div>
 
         <div class="checkbox-group">
@@ -602,6 +719,22 @@ function getFormA8() {
             <input type="checkbox" id="garanziaModuli" required>
             <label for="garanziaModuli">Garanzia moduli 90% dopo 10 anni (obbligatorio)</label>
         </div>
+
+        ${getFormPompaDiCaloreAbbinata()}
+
+        <script>
+            document.getElementById('abbinamentoPC_A8').addEventListener('change', togglePDCSectionA8);
+
+            function togglePDCSectionA8() {
+                const abbinamentoPC = document.getElementById('abbinamentoPC_A8').checked;
+                const pdcSection = document.getElementById('pdc-section');
+                if (abbinamentoPC) {
+                    pdcSection.style.display = 'block';
+                } else {
+                    pdcSection.style.display = 'none';
+                }
+            }
+        </script>
     `;
 }
 
@@ -1024,6 +1157,85 @@ function getFormB7() {
     `;
 }
 
+// Helper: Calcola incentivo pompa di calore se compilata
+function calcolaIncentivoPompaDiCalore(zonaClimatica) {
+    const pdcPotenza = document.getElementById('pdc_potenza');
+    const pdcScop = document.getElementById('pdc_scop');
+    const pdcEtaS = document.getElementById('pdc_eta_s');
+    const pdcSpesaTotale = document.getElementById('pdc_spesaTotale');
+    const pdcTipoPDC = document.getElementById('pdc_tipoPDC');
+    const pdcSostituzioneImpianto = document.getElementById('pdc_sostituzioneImpianto');
+
+    // Verifica se i campi sono compilati
+    if (!pdcPotenza || !pdcPotenza.value || !pdcSpesaTotale || !pdcSpesaTotale.value) {
+        return null; // PDC non compilata
+    }
+
+    const potenza = parseFloat(pdcPotenza.value);
+    const scop = parseFloat(pdcScop.value);
+    const eta_s = parseFloat(pdcEtaS.value);
+    const spesaTotale = parseFloat(pdcSpesaTotale.value);
+    const tipoPDC = pdcTipoPDC.value;
+    const sostituzioneImpianto = pdcSostituzioneImpianto.checked;
+
+    if (!sostituzioneImpianto) {
+        throw new Error('Pompa di Calore: Sostituzione di impianto esistente è obbligatoria');
+    }
+
+    // Validazione efficienza
+    const effMin = EFFICIENZA_MIN_PDC[tipoPDC];
+    if (tipoPDC === 'gas') {
+        if (scop < effMin.sper) {
+            throw new Error(`Pompa di Calore: SPER=${scop} è inferiore al valore minimo ${effMin.sper}`);
+        }
+    } else {
+        if (scop < effMin.scop) {
+            throw new Error(`Pompa di Calore: SCOP=${scop} è inferiore al valore minimo ${effMin.scop}`);
+        }
+    }
+    if (eta_s < effMin.eta_s) {
+        throw new Error(`Pompa di Calore: ηs=${eta_s}% è inferiore al valore minimo ${effMin.eta_s}%`);
+    }
+
+    // Calcolo energia termica incentivabile
+    const Ci = COEFF_VALORIZZAZIONE[zonaClimatica];
+    const Quf = COEFF_UTILIZZO[zonaClimatica];
+    const Qu = potenza * Quf;
+    const Is = Qu * Ci;
+
+    // Calcolo incentivo
+    const incentivoTeorico = Is;
+    const Imax = potenza <= 35 ? 700 * potenza : 65000;
+    const limite65 = spesaTotale * 0.65;
+    const incentivoFinale = Math.min(incentivoTeorico, Imax, limite65);
+
+    let vincoloApplicato = 'Nessun vincolo';
+    if (incentivoFinale === Imax) vincoloApplicato = 'Imax = ' + Imax.toFixed(2) + ' €';
+    if (incentivoFinale === limite65) vincoloApplicato = '65% della spesa = ' + limite65.toFixed(2) + ' €';
+
+    const durataAnni = incentivoFinale <= 5000 ? 2 : 5;
+    const rataAnnuale = incentivoFinale / durataAnni;
+
+    return {
+        tipo: 'B.1 - Pompa di Calore Elettrica',
+        incentivoTeorico: incentivoTeorico,
+        incentivoFinale: incentivoFinale,
+        vincoloApplicato: vincoloApplicato,
+        durataAnni: durataAnni,
+        rataAnnuale: rataAnnuale,
+        dettagli: {
+            'Tipologia PDC': tipoPDC.replace('_', ' '),
+            'Potenza nominale': potenza.toFixed(2) + ' kW',
+            'SCOP/SPER': scop.toFixed(2),
+            'ηs': eta_s + '%',
+            'Energia termica (Qu)': Qu.toFixed(2) + ' kW',
+            'Coefficiente Ci': Ci + ' €/kWht',
+            'Spesa sostenuta': spesaTotale.toFixed(2) + ' €',
+            'Zona climatica': zonaClimatica
+        }
+    };
+}
+
 // Funzione principale di calcolo
 function calcolaIncentivo() {
     if (!interventoSelezionato) {
@@ -1138,6 +1350,12 @@ function calcolaA1() {
         incentivoFinale === limite65 ? '65% spesa sostenuta' :
         'Nessun vincolo';
 
+    // Calcolo pompa di calore abbinata se multi-intervento
+    let incentivoPDC = null;
+    if (multiIntervento) {
+        incentivoPDC = calcolaIncentivoPompaDiCalore(zonaClimatica);
+    }
+
     return {
         tipo: 'A.1 - Isolamento Termico',
         incentivoTeorico: incentivoTeorico,
@@ -1157,7 +1375,8 @@ function calcolaA1() {
             '% spesa applicata': (percSpesa * 100).toFixed(0) + '%',
             'Limite 65%': limite65.toFixed(2) + ' €'
         },
-        warning: 'Ricorda: Diagnosi Energetica preventiva e APE post-intervento sono obbligatori.'
+        warning: 'Ricorda: Diagnosi Energetica preventiva e APE post-intervento sono obbligatori.',
+        interventoAbbinato: incentivoPDC
     };
 }
 
@@ -1486,6 +1705,7 @@ function calcolaA7() {
     const potenzaColonnina = parseFloat(document.getElementById('potenzaColonnina').value);
     const costoColonnina = parseFloat(document.getElementById('costoColonnina').value);
     const spesaTotale = parseFloat(document.getElementById('spesaTotale').value);
+    const zonaClimatica = document.getElementById('zonaClimatica').value;
     const abbinamentoPC = document.getElementById('abbinamentoPC').checked;
     const smart = document.getElementById('smart').checked;
 
@@ -1516,6 +1736,12 @@ function calcolaA7() {
         incentivoFinale === limite65 ? '65% spesa sostenuta' :
         'Nessun vincolo';
 
+    // Calcolo pompa di calore abbinata (obbligatoria per A.7)
+    const incentivoPDC = calcolaIncentivoPompaDiCalore(zonaClimatica);
+    if (!incentivoPDC && abbinamentoPC) {
+        throw new Error('Devi compilare i dati della pompa di calore abbinata (obbligatoria per le colonnine di ricarica)');
+    }
+
     return {
         tipo: 'A.7 - Colonnine Ricarica Veicoli Elettrici',
         incentivoTeorico: incentivoTeorico,
@@ -1532,7 +1758,8 @@ function calcolaA7() {
             '% spesa applicata': (percSpesa * 100).toFixed(0) + '%',
             'Limite 65%': limite65.toFixed(2) + ' €'
         },
-        warning: 'Abbinamento obbligatorio a pompa di calore elettrica. Potenza min 7,4 kW, tipologia smart, Modo 3 o 4.'
+        warning: 'Abbinamento obbligatorio a pompa di calore elettrica. Potenza min 7,4 kW, tipologia smart, Modo 3 o 4.',
+        interventoAbbinato: incentivoPDC
     };
 }
 
@@ -1542,9 +1769,14 @@ function calcolaA8() {
     const spesaFV = parseFloat(document.getElementById('spesaFV').value);
     const capacitaAccumulo = parseFloat(document.getElementById('capacitaAccumulo').value) || 0;
     const spesaAccumulo = parseFloat(document.getElementById('spesaAccumulo').value) || 0;
-    const incentivoPC = parseFloat(document.getElementById('incentivoPC').value);
+    const zonaClimatica = document.getElementById('zonaClimatica').value;
+    const abbinamentoPC = document.getElementById('abbinamentoPC_A8').checked;
     const certificazioneCE = document.getElementById('certificazioneCE').checked;
     const garanziaModuli = document.getElementById('garanziaModuli').checked;
+
+    if (!abbinamentoPC) {
+        throw new Error('Abbinamento a pompa di calore elettrica è obbligatorio');
+    }
 
     if (!certificazioneCE) {
         throw new Error('Certificazione CE di moduli e inverter è obbligatoria');
@@ -1584,15 +1816,22 @@ function calcolaA8() {
     const incentivoAccumulo = 0.20 * costoAmmissibileAccumulo;
     const incentivoTeorico = incentivoFV + incentivoAccumulo;
 
+    // Calcolo pompa di calore abbinata (obbligatoria per A.8)
+    const incentivoPDC = calcolaIncentivoPompaDiCalore(zonaClimatica);
+    if (!incentivoPDC && abbinamentoPC) {
+        throw new Error('Devi compilare i dati della pompa di calore abbinata (obbligatoria per fotovoltaico)');
+    }
+
     // Vincolo: non può superare l'incentivo della pompa di calore abbinata
-    const incentivoFinale = Math.min(incentivoTeorico, incentivoPC);
+    const incentivoPC_valore = incentivoPDC ? incentivoPDC.incentivoFinale : 0;
+    const incentivoFinale = Math.min(incentivoTeorico, incentivoPC_valore);
 
     const vincoloApplicato =
-        incentivoFinale === incentivoPC ? 'Incentivo pompa di calore abbinata' :
+        incentivoFinale === incentivoPC_valore ? 'Incentivo pompa di calore abbinata' :
         'Nessun vincolo';
 
     return {
-        tipo: 'A.5 - Fotovoltaico e Accumulo',
+        tipo: 'A.8 - Fotovoltaico e Accumulo',
         incentivoTeorico: incentivoTeorico,
         incentivoFinale: incentivoFinale,
         vincoloApplicato: vincoloApplicato,
@@ -1607,9 +1846,10 @@ function calcolaA8() {
             'Capacità Accumulo': capacitaAccumulo.toFixed(2) + ' kWh',
             'Spesa Accumulo': spesaAccumulo.toFixed(2) + ' €',
             'Incentivo Accumulo': incentivoAccumulo.toFixed(2) + ' €',
-            'Incentivo PC abbinata': incentivoPC.toFixed(2) + ' €'
+            'Incentivo PC abbinata (calcolato)': incentivoPC_valore.toFixed(2) + ' €'
         },
-        warning: 'Deve essere abbinato a sostituzione impianto con pompa di calore elettrica. Assetto in autoconsumo.'
+        warning: 'Deve essere abbinato a sostituzione impianto con pompa di calore elettrica. Assetto in autoconsumo.',
+        interventoAbbinato: incentivoPDC
     };
 }
 
@@ -2105,6 +2345,71 @@ function mostraRisultati(risultato) {
                 Per soggetti privati, l'incentivo può essere erogato in unica rata (importo ≤ 15.000 €).
             </div>
         `;
+    }
+
+    // Se presente intervento abbinato, mostralo
+    if (risultato.interventoAbbinato) {
+        const abb = risultato.interventoAbbinato;
+        html += `
+            <div style="margin-top: 30px; padding-top: 30px; border-top: 3px solid #00A19C;">
+                <div class="result-highlight" style="background: linear-gradient(135deg, #006B68 0%, #008E89 100%);">
+                    <h3>Intervento Abbinato</h3>
+                    <div class="amount">${abb.incentivoFinale.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</div>
+                </div>
+
+                <div class="details-box">
+                    <h4>${abb.tipo}</h4>
+                    <div class="result-item">
+                        <span class="result-label">Incentivo teorico:</span>
+                        <span class="result-value">${abb.incentivoTeorico.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Incentivo finale:</span>
+                        <span class="result-value">${abb.incentivoFinale.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Vincolo applicato:</span>
+                        <span class="result-value">${abb.vincoloApplicato}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Durata incentivo:</span>
+                        <span class="result-value">${abb.durataAnni} anni</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Rata annuale:</span>
+                        <span class="result-value">${abb.rataAnnuale.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</span>
+                    </div>
+                </div>
+
+                <div class="details-box">
+                    <h4>Dettagli Intervento Abbinato</h4>
+        `;
+
+        for (const [chiave, valore] of Object.entries(abb.dettagli)) {
+            html += `
+                <div class="result-item">
+                    <span class="result-label">${chiave}:</span>
+                    <span class="result-value">${valore}</span>
+                </div>
+            `;
+        }
+
+        html += `</div>`;
+
+        // Riepilogo totale multi-intervento
+        const totaleIncentivi = risultato.incentivoFinale + abb.incentivoFinale;
+        html += `
+            <div class="result-highlight" style="margin-top: 20px; background: linear-gradient(135deg, #2C3E50 0%, #1A252F 100%);">
+                <h3>TOTALE INCENTIVI (Multi-Intervento)</h3>
+                <div class="amount">${totaleIncentivi.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</div>
+                <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.9;">
+                    ${risultato.tipo}: ${risultato.incentivoFinale.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2})} € +
+                    ${abb.tipo}: ${abb.incentivoFinale.toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
+                </p>
+            </div>
+        `;
+
+        html += `</div>`;
     }
 
     risultatiDettaglio.innerHTML = html;
