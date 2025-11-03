@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolo Incentivi Conto Termico 3.0</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Calcolo Incentivi Conto Termico 3.0</h1>
+            <p class="subtitle">Calcola l'incentivo per interventi di efficienza energetica e produzione di energia termica</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2>Seleziona Tipologia di Intervento</h2>
+
+                <div class="form-group">
+                    <label for="intervento-tipo">Categoria:</label>
+                    <select id="intervento-tipo" onchange="mostraFormIntervento()">
+                        <option value="">-- Seleziona --</option>
+                        <optgroup label="Efficienza Energetica (Art. 5)">
+                            <option value="A1">A.1 - Isolamento Termico (Superfici opache)</option>
+                            <option value="A2">A.2 - Sostituzione Chiusure Trasparenti</option>
+                            <option value="A3">A.3 - Trasformazione NZEB</option>
+                            <option value="A4">A.4 - Building Automation</option>
+                            <option value="A5">A.5 - Fotovoltaico e Accumulo</option>
+                        </optgroup>
+                        <optgroup label="Produzione Energia Termica (Art. 8)">
+                            <option value="B1">B.1 - Pompe di Calore Elettriche</option>
+                            <option value="B2">B.2 - Sistemi Ibridi/Bivalenti</option>
+                            <option value="B3">B.3 - Scaldacqua a Pompa di Calore</option>
+                            <option value="B4">B.4 - Allaccio a Teleriscaldamento</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <!-- Form dinamici per ogni tipologia -->
+                <div id="form-container"></div>
+
+                <button id="calcola-btn" onclick="calcolaIncentivo()" style="display:none;">Calcola Incentivo</button>
+            </section>
+
+            <section class="results-section" id="results" style="display:none;">
+                <h2>Risultati del Calcolo</h2>
+                <div id="risultati-dettaglio"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Calcolatore basato sulle disposizioni del Decreto Conto Termico 3.0</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
