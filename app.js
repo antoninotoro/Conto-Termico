@@ -123,6 +123,77 @@ document.addEventListener('click', function() {
     closeTooltip();
 });
 
+// Funzione per mostrare campi condizionali in base al soggetto richiedente
+function mostraCampiSoggetto() {
+    const select = document.getElementById('soggetto-richiedente');
+    const soggetto = select.value;
+    const container = document.getElementById('campi-soggetto-container');
+
+    if (!soggetto) {
+        container.innerHTML = '';
+        return;
+    }
+
+    let campiHTML = '';
+
+    // Campi per imprese
+    if (soggetto.startsWith('impresa_')) {
+        campiHTML += `
+            <div class="form-row">
+                <div class="form-group">
+                    <label>${labelWithInfo('Dimensione Impresa', '<b>Piccola impresa:</b> <250 dipendenti, fatturato ≤50M€ o bilancio ≤43M€. <b>Media impresa:</b> <250 dipendenti, fatturato ≤50M€ o bilancio ≤43M€ ma non piccola. <b>Grande impresa:</b> oltre tali limiti. La dimensione influenza le maggiorazioni dell\'incentivo.')}</label>
+                    <select id="dimensione-impresa">
+                        <option value="grande">Grande Impresa</option>
+                        <option value="media">Media Impresa (+10%)</option>
+                        <option value="piccola">Piccola Impresa (+20%)</option>
+                    </select>
+                </div>
+            </div>
+        `;
+
+        if (soggetto === 'impresa_efficienza') {
+            campiHTML += `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>${labelWithInfo('Zona Assistita', 'Zone geografiche con particolare necessità di sviluppo economico (ex Obiettivo Convergenza UE). Prevalentemente Sud Italia e aree specifiche. Se l\'intervento è realizzato in zona assistita, l\'incentivo aumenta del +15%. Verifica su Carta degli Aiuti di Stato.')}</label>
+                        <select id="zona-assistita">
+                            <option value="no">No</option>
+                            <option value="si">Sì - Zona Assistita (+15%)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>${labelWithInfo('Miglioramento Prestazione ≥40%', 'Se l\'intervento di efficienza energetica determina un miglioramento della prestazione energetica dell\'edificio di almeno il 40% (rispetto allo stato ante operam), l\'incentivo aumenta del +15%. Si dimostra tramite APE ante e post intervento.')}</label>
+                        <select id="miglioramento-40">
+                            <option value="no">No</option>
+                            <option value="si">Sì - Miglioramento ≥40% (+15%)</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // Campi per comuni piccoli
+    if (soggetto === 'comune_piccolo') {
+        campiHTML += `
+            <div class="info" style="margin-top: 15px;">
+                <strong>Requisiti:</strong> Il Comune deve avere popolazione ≤15.000 abitanti e l'intervento deve essere realizzato su edifici di proprietà del comune e da esso utilizzati. L'incentivo copre il 100% delle spese ammissibili.
+            </div>
+        `;
+    }
+
+    // Campi per edifici pubblici Art. 48-ter
+    if (soggetto === 'edificio_pubblico') {
+        campiHTML += `
+            <div class="info" style="margin-top: 15px;">
+                <strong>Edifici previsti all'Art. 48-ter D.L. 104/2020:</strong> L'incentivo copre il 100% delle spese ammissibili per interventi su edifici pubblici appartenenti a qualunque categoria catastale, previsti dalla normativa specifica.
+            </div>
+        `;
+    }
+
+    container.innerHTML = campiHTML;
+}
+
 // Funzione per mostrare il form appropriato
 function mostraFormIntervento() {
     const select = document.getElementById('intervento-tipo');
@@ -1290,8 +1361,9 @@ function calcolaIncentivoPompaDiCalore(zonaClimatica) {
     // Calcolo incentivo
     const incentivoTeorico = Is;
     const Imax = potenza <= 35 ? 700 * potenza : 65000;
-    const limite65 = spesaTotale * 0.65;
-    const incentivoFinale = Math.min(incentivoTeorico, Imax, limite65);
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
+    const incentivoFinale = Math.min(incentivoTeorico, Imax, limiteMassimale);
 
     let vincoloApplicato = 'Nessun vincolo';
     if (incentivoFinale === Imax) vincoloApplicato = 'Imax = ' + Imax.toFixed(2) + ' €';
@@ -1321,7 +1393,97 @@ function calcolaIncentivoPompaDiCalore(zonaClimatica) {
 }
 
 // Funzione principale di calcolo
+// Funzione per calcolare il massimale in base al soggetto richiedente
+function getMassimaleSoggetto() {
+    const soggettoSelect = document.getElementById('soggetto-richiedente');
+    if (!soggettoSelect || !soggettoSelect.value) {
+        // Default: limite 65% se non è specificato il soggetto
+        return {
+            percentuale: 0.65,
+            descrizione: '65% spesa sostenuta (default)',
+            maggiorazioni: 0
+        };
+    }
+
+    const soggetto = soggettoSelect.value;
+    let percentuale = 0.65;
+    let descrizione = '65% spesa sostenuta';
+    let maggiorazioni = 0;
+
+    // Soggetti con 100% delle spese
+    if (soggetto === 'comune_piccolo') {
+        percentuale = 1.0;
+        descrizione = '100% spesa sostenuta (Comune ≤15.000 abitanti)';
+    } else if (soggetto === 'edificio_pubblico') {
+        percentuale = 1.0;
+        descrizione = '100% spesa sostenuta (Edificio Pubblico Art. 48-ter)';
+    }
+    // Soggetti privati e PA: 65%
+    else if (soggetto === 'privato' || soggetto === 'pa') {
+        percentuale = 0.65;
+        descrizione = '65% spesa sostenuta';
+    }
+    // Imprese: percentuali specifiche + maggiorazioni
+    else if (soggetto.startsWith('impresa_')) {
+        // Percentuale base per tipo di impresa
+        if (soggetto === 'impresa_efficienza') {
+            percentuale = 0.25; // 25% base per efficienza energetica
+            descrizione = 'Max 25% costi ammissibili (impresa efficienza)';
+        } else if (soggetto === 'impresa_multi') {
+            percentuale = 0.30; // 30% base per multi-intervento
+            descrizione = 'Max 30% costi ammissibili (impresa multi-intervento)';
+        } else if (soggetto === 'impresa_fer') {
+            percentuale = 0.45; // 45% base per FER
+            descrizione = 'Max 45% costi ammissibili (impresa FER)';
+        }
+
+        // Maggiorazioni per dimensione impresa
+        const dimensioneImpresa = document.getElementById('dimensione-impresa');
+        if (dimensioneImpresa) {
+            const dimensione = dimensioneImpresa.value;
+            if (dimensione === 'piccola') {
+                maggiorazioni += 0.20; // +20%
+                descrizione += ' +20% (piccola impresa)';
+            } else if (dimensione === 'media') {
+                maggiorazioni += 0.10; // +10%
+                descrizione += ' +10% (media impresa)';
+            }
+        }
+
+        // Maggiorazioni specifiche per imprese efficienza
+        if (soggetto === 'impresa_efficienza') {
+            const zonaAssistita = document.getElementById('zona-assistita');
+            const miglioramento40 = document.getElementById('miglioramento-40');
+
+            if (zonaAssistita && zonaAssistita.value === 'si') {
+                maggiorazioni += 0.15; // +15%
+                descrizione += ' +15% (zona assistita)';
+            }
+            if (miglioramento40 && miglioramento40.value === 'si') {
+                maggiorazioni += 0.15; // +15%
+                descrizione += ' +15% (miglioramento ≥40%)';
+            }
+        }
+
+        // Percentuale finale con maggiorazioni
+        percentuale += maggiorazioni;
+    }
+
+    return {
+        percentuale: percentuale,
+        descrizione: descrizione,
+        maggiorazioni: maggiorazioni
+    };
+}
+
 function calcolaIncentivo() {
+    // Verifica che sia selezionato un soggetto richiedente
+    const soggettoSelect = document.getElementById('soggetto-richiedente');
+    if (!soggettoSelect || !soggettoSelect.value) {
+        alert('Seleziona prima il tipo di soggetto richiedente');
+        return;
+    }
+
     if (!interventoSelezionato) {
         alert('Seleziona una tipologia di intervento');
         return;
@@ -1423,15 +1585,16 @@ function calcolaA1() {
     // Calcolo incentivo teorico
     const incentivoTeorico = percSpesa * costoSpecifico * superficie;
 
-    // Applicazione vincoli
+    // Applicazione vincoli con massimale soggetto
     const Imax = 1000000; // €
-    const limite65 = spesaTotale * 0.65;
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
 
-    const incentivoFinale = Math.min(incentivoTeorico, Imax, limite65);
+    const incentivoFinale = Math.min(incentivoTeorico, Imax, limiteMassimale);
 
     const vincoloApplicato =
         incentivoFinale === Imax ? 'Imax (1.000.000 €)' :
-        incentivoFinale === limite65 ? '65% spesa sostenuta' :
+        incentivoFinale === limiteMassimale ? massimale.descrizione :
         'Nessun vincolo';
 
     // Calcolo pompa di calore abbinata se multi-intervento
@@ -1457,7 +1620,7 @@ function calcolaA1() {
             'Costo specifico': costoSpecifico.toFixed(2) + ' €/m²',
             'Spesa totale': spesaTotale.toFixed(2) + ' €',
             '% spesa applicata': (percSpesa * 100).toFixed(0) + '%',
-            'Limite 65%': limite65.toFixed(2) + ' €'
+            'Massimale soggetto': (massimale.percentuale * 100).toFixed(0) + '% → ' + limiteMassimale.toFixed(2) + ' €'
         },
         warning: 'Ricorda: Diagnosi Energetica preventiva e APE post-intervento sono obbligatori.',
         interventoAbbinato: incentivoPDC
@@ -1500,13 +1663,14 @@ function calcolaA2() {
 
     // Applicazione vincoli
     const Imax = 500000;
-    const limite65 = spesaTotale * 0.65;
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
 
-    const incentivoFinale = Math.min(incentivoTeorico, Imax, limite65);
+    const incentivoFinale = Math.min(incentivoTeorico, Imax, limiteMassimale);
 
     const vincoloApplicato =
         incentivoFinale === Imax ? 'Imax (500.000 €)' :
-        incentivoFinale === limite65 ? '65% spesa sostenuta' :
+        incentivoFinale === limiteMassimale ? massimale.descrizione :
         costoSpecifico > Cmax ? 'Costo massimo ammissibile' :
         'Nessun vincolo';
 
@@ -1528,7 +1692,7 @@ function calcolaA2() {
             'Costo utilizzato': costoAmmissibile.toFixed(2) + ' €/m²',
             'Spesa totale': spesaTotale.toFixed(2) + ' €',
             '% spesa applicata': (percSpesa * 100).toFixed(0) + '%',
-            'Limite 65%': limite65.toFixed(2) + ' €'
+            'Massimale soggetto': (massimale.percentuale * 100).toFixed(0) + '% → ' + limiteMassimale.toFixed(2) + ' €'
         }
     };
 }
@@ -1566,13 +1730,14 @@ function calcolaA3() {
 
     // Applicazione vincoli
     const Imax = 200000; // € (stima)
-    const limite65 = spesaTotale * 0.65;
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
 
-    const incentivoFinale = Math.min(incentivoTeorico, Imax, limite65);
+    const incentivoFinale = Math.min(incentivoTeorico, Imax, limiteMassimale);
 
     const vincoloApplicato =
         incentivoFinale === Imax ? 'Imax (200.000 €)' :
-        incentivoFinale === limite65 ? '65% spesa sostenuta' :
+        incentivoFinale === limiteMassimale ? massimale.descrizione :
         'Nessun vincolo';
 
     return {
@@ -1588,7 +1753,7 @@ function calcolaA3() {
             'Costo specifico': costoSpecifico.toFixed(2) + ' €/m²',
             'Spesa totale': spesaTotale.toFixed(2) + ' €',
             '% spesa applicata': (percSpesa * 100).toFixed(0) + '%',
-            'Limite 65%': limite65.toFixed(2) + ' €'
+            'Massimale soggetto': (massimale.percentuale * 100).toFixed(0) + '% → ' + limiteMassimale.toFixed(2) + ' €'
         },
         warning: 'Abbinamento obbligatorio a sostituzione chiusure trasparenti.'
     };
@@ -1622,13 +1787,14 @@ function calcolaA4() {
 
     // Applicazione vincoli
     const Imax = ['A', 'B', 'C'].includes(zonaClimatica) ? 2500000 : 3000000;
-    const limite65 = spesaTotale * 0.65;
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
 
-    const incentivoFinale = Math.min(incentivoTeorico, Imax, limite65);
+    const incentivoFinale = Math.min(incentivoTeorico, Imax, limiteMassimale);
 
     const vincoloApplicato =
         incentivoFinale === Imax ? `Imax (${Imax.toLocaleString('it-IT')} €)` :
-        incentivoFinale === limite65 ? '65% spesa sostenuta' :
+        incentivoFinale === limiteMassimale ? massimale.descrizione :
         costoSpecifico > Cmax ? 'Costo massimo ammissibile' :
         'Nessun vincolo';
 
@@ -1648,7 +1814,7 @@ function calcolaA4() {
             'Costo utilizzato': costoAmmissibile.toFixed(2) + ' €/m²',
             'Spesa totale': spesaTotale.toFixed(2) + ' €',
             '% spesa applicata': (percSpesa * 100).toFixed(0) + '%',
-            'Limite 65%': limite65.toFixed(2) + ' €'
+            'Massimale soggetto': (massimale.percentuale * 100).toFixed(0) + '% → ' + limiteMassimale.toFixed(2) + ' €'
         },
         warning: 'Intervento ammesso solo con ristrutturazione edilizia o demolizione/ricostruzione. APE NZEB e Diagnosi Energetica obbligatori.'
     };
@@ -1696,13 +1862,14 @@ function calcolaA5() {
 
     // Applicazione vincoli
     const Imax = 150000; // € (stima)
-    const limite65 = spesaTotale * 0.65;
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
 
-    const incentivoFinale = Math.min(incentivoTeorico, Imax, limite65);
+    const incentivoFinale = Math.min(incentivoTeorico, Imax, limiteMassimale);
 
     const vincoloApplicato =
         incentivoFinale === Imax ? 'Imax (150.000 €)' :
-        incentivoFinale === limite65 ? '65% spesa sostenuta' :
+        incentivoFinale === limiteMassimale ? massimale.descrizione :
         'Nessun vincolo';
 
     return {
@@ -1721,7 +1888,7 @@ function calcolaA5() {
             'CRI': cri + ' (min: >' + criMin + ')',
             'Spesa totale': spesaTotale.toFixed(2) + ' €',
             '% spesa applicata': (percSpesa * 100).toFixed(0) + '%',
-            'Limite 65%': limite65.toFixed(2) + ' €'
+            'Massimale soggetto': (massimale.percentuale * 100).toFixed(0) + '% → ' + limiteMassimale.toFixed(2) + ' €'
         }
     };
 }
@@ -1753,13 +1920,14 @@ function calcolaA6() {
 
     // Applicazione vincoli
     const Imax = 100000;
-    const limite65 = spesaTotale * 0.65;
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
 
-    const incentivoFinale = Math.min(incentivoTeorico, Imax, limite65);
+    const incentivoFinale = Math.min(incentivoTeorico, Imax, limiteMassimale);
 
     const vincoloApplicato =
         incentivoFinale === Imax ? 'Imax (100.000 €)' :
-        incentivoFinale === limite65 ? '65% spesa sostenuta' :
+        incentivoFinale === limiteMassimale ? massimale.descrizione :
         costoSpecifico > Cmax ? 'Costo massimo ammissibile' :
         'Nessun vincolo';
 
@@ -1778,7 +1946,7 @@ function calcolaA6() {
             'Costo utilizzato': costoAmmissibile.toFixed(2) + ' €/m²',
             'Spesa totale': spesaTotale.toFixed(2) + ' €',
             '% spesa applicata': (percSpesa * 100).toFixed(0) + '%',
-            'Limite 65%': limite65.toFixed(2) + ' €'
+            'Massimale soggetto': (massimale.percentuale * 100).toFixed(0) + '% → ' + limiteMassimale.toFixed(2) + ' €'
         }
     };
 }
@@ -1811,13 +1979,14 @@ function calcolaA7() {
 
     // Vincoli
     const Imax = 100000; // € (stima)
-    const limite65 = spesaTotale * 0.65;
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
 
-    const incentivoFinale = Math.min(incentivoTeorico, Imax, limite65);
+    const incentivoFinale = Math.min(incentivoTeorico, Imax, limiteMassimale);
 
     const vincoloApplicato =
         incentivoFinale === Imax ? 'Imax (100.000 €)' :
-        incentivoFinale === limite65 ? '65% spesa sostenuta' :
+        incentivoFinale === limiteMassimale ? massimale.descrizione :
         'Nessun vincolo';
 
     // Calcolo pompa di calore abbinata (obbligatoria per A.7)
@@ -1840,7 +2009,7 @@ function calcolaA7() {
             'Costo per colonnina': costoColonnina.toFixed(2) + ' €',
             'Spesa totale': spesaTotale.toFixed(2) + ' €',
             '% spesa applicata': (percSpesa * 100).toFixed(0) + '%',
-            'Limite 65%': limite65.toFixed(2) + ' €'
+            'Massimale soggetto': (massimale.percentuale * 100).toFixed(0) + '% → ' + limiteMassimale.toFixed(2) + ' €'
         },
         warning: 'Abbinamento obbligatorio a pompa di calore elettrica. Potenza min 7,4 kW, tipologia smart, Modo 3 o 4.',
         interventoAbbinato: incentivoPDC
@@ -1978,12 +2147,13 @@ function calcolaB1() {
     const incentivoTeorico = durataAnni * Ei * Ci;
 
     // Applicazione vincoli
-    const limite65 = spesaTotale * 0.65;
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
 
     const incentivoFinale = Math.min(incentivoTeorico, limite65);
 
     const vincoloApplicato =
-        incentivoFinale === limite65 ? '65% spesa sostenuta' :
+        incentivoFinale === limiteMassimale ? massimale.descrizione :
         'Nessun vincolo';
 
     return {
@@ -2003,7 +2173,7 @@ function calcolaB1() {
             'Energia incentivata (Ei)': Ei.toFixed(2) + ' kWht/anno',
             'Coeff. valorizzazione (Ci)': Ci.toFixed(3) + ' €/kWht',
             'Spesa totale': spesaTotale.toFixed(2) + ' €',
-            'Limite 65%': limite65.toFixed(2) + ' €',
+            'Massimale soggetto': (massimale.percentuale * 100).toFixed(0) + '% → ' + limiteMassimale.toFixed(2) + ' €',
             'Durata': durataAnni + ' anni'
         },
         warning: 'Richiesta Diagnosi Energetica e APE per impianti ≥200 kW.'
@@ -2060,12 +2230,13 @@ function calcolaB2() {
     const incentivoTeorico = durataAnni * k * Ei * Ci;
 
     // Applicazione vincoli
-    const limite65 = spesaTotale * 0.65;
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
 
     const incentivoFinale = Math.min(incentivoTeorico, limite65);
 
     const vincoloApplicato =
-        incentivoFinale === limite65 ? '65% spesa sostenuta' :
+        incentivoFinale === limiteMassimale ? massimale.descrizione :
         'Nessun vincolo';
 
     return {
@@ -2086,7 +2257,7 @@ function calcolaB2() {
             'Energia incentivata (Ei)': Ei.toFixed(2) + ' kWht/anno',
             'Coeff. valorizzazione (Ci)': Ci.toFixed(3) + ' €/kWht',
             'Spesa totale': spesaTotale.toFixed(2) + ' €',
-            'Limite 65%': limite65.toFixed(2) + ' €',
+            'Massimale soggetto': (massimale.percentuale * 100).toFixed(0) + '% → ' + limiteMassimale.toFixed(2) + ' €',
             'Durata': durataAnni + ' anni'
         }
     };
@@ -2117,7 +2288,8 @@ function calcolaB3() {
 
     // Calcolo semplificato: 65% della spesa
     const incentivoTeorico = 0.65 * spesaTotale;
-    const limite65 = spesaTotale * 0.65;
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
     const incentivoFinale = Math.min(incentivoTeorico, limite65);
 
     return {
@@ -2157,7 +2329,8 @@ function calcolaB4() {
 
     // Calcolo semplificato: 65% della spesa
     const incentivoTeorico = 0.65 * spesaTotale;
-    const limite65 = spesaTotale * 0.65;
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
     const incentivoFinale = Math.min(incentivoTeorico, limite65);
 
     return {
@@ -2262,12 +2435,13 @@ function calcolaB6() {
     const incentivoTeorico = 0.65 * costoSpecifico * potenza;
 
     // Applicazione vincoli
-    const limite65 = spesaTotale * 0.65;
-    const incentivoFinale = Math.min(incentivoTeorico, Imax, limite65);
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
+    const incentivoFinale = Math.min(incentivoTeorico, Imax, limiteMassimale);
 
     const vincoloApplicato =
         incentivoFinale === Imax ? `Imax (${Imax.toLocaleString('it-IT')} €)` :
-        incentivoFinale === limite65 ? '65% spesa sostenuta' :
+        incentivoFinale === limiteMassimale ? massimale.descrizione :
         'Nessun vincolo';
 
     return {
@@ -2283,7 +2457,7 @@ function calcolaB6() {
             'Costo specifico': costoSpecifico.toFixed(2) + ' €/kW',
             'Spesa totale': spesaTotale.toFixed(2) + ' €',
             'Massimale (Imax)': Imax.toLocaleString('it-IT') + ' €',
-            'Limite 65%': limite65.toFixed(2) + ' €',
+            'Massimale soggetto': (massimale.percentuale * 100).toFixed(0) + '% → ' + limiteMassimale.toFixed(2) + ' €',
             'Durata': '5 anni'
         }
     };
@@ -2312,7 +2486,8 @@ function calcolaB7() {
 
     // Calcolo semplificato: 65% della spesa
     const incentivoTeorico = 0.65 * spesaTotale;
-    const limite65 = spesaTotale * 0.65;
+    const massimale = getMassimaleSoggetto();
+    const limiteMassimale = spesaTotale * massimale.percentuale;
     const incentivoFinale = Math.min(incentivoTeorico, limite65);
 
     return {

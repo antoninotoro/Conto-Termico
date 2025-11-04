@@ -20,6 +20,24 @@
 
         <main>
             <section class="input-section">
+                <h2>Soggetto Richiedente</h2>
+
+                <div class="form-group">
+                    <label for="soggetto-richiedente">Tipologia Soggetto:</label>
+                    <select id="soggetto-richiedente" onchange="mostraCampiSoggetto()">
+                        <option value="">-- Seleziona --</option>
+                        <option value="privato">Soggetto Privato (non impresa)</option>
+                        <option value="pa">Amministrazione Pubblica</option>
+                        <option value="comune_piccolo">Comune con popolazione ≤ 15.000 abitanti</option>
+                        <option value="edificio_pubblico">Edificio Pubblico (Art. 48-ter D.L. 104/2020)</option>
+                        <option value="impresa_efficienza">Impresa - Efficienza Energetica (Art. 5)</option>
+                        <option value="impresa_multi">Impresa - Multi-intervento</option>
+                        <option value="impresa_fer">Impresa - Energia Termica da FER (Art. 8)</option>
+                    </select>
+                </div>
+
+                <div id="campi-soggetto-container"></div>
+
                 <h2>Seleziona Tipologia di Intervento</h2>
 
                 <div class="form-group">
