@@ -379,7 +379,7 @@ function getFormA2() {
         </div>
 
         <div class="form-group">
-            <label>Zona Climatica:</label>
+            ${labelWithInfo('Zona Climatica', 'Zona climatica del comune dove si trova l\'edificio (da A=caldo a F=freddo). Determina i limiti massimi di trasmittanza ammessi per le finestre.')}
             <select id="zonaClimatica">
                 ${ZONE_CLIMATICHE.map(z => `<option value="${z}">${z}</option>`).join('')}
             </select>
@@ -387,23 +387,23 @@ function getFormA2() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Trasmittanza U finestre (W/m²K):</label>
+                ${labelWithInfo('Trasmittanza U finestre (W/m²K)', 'Trasmittanza termica dell\'intero serramento (telaio + vetro) DOPO la sostituzione. Misura l\'isolamento: valori più bassi = minor dispersione di calore. Deve rispettare i limiti per zona climatica.')}
                 <input type="number" id="trasmittanza" min="0" step="0.01" required>
                 <small id="trasmittanza-info" class="info-text"></small>
             </div>
             <div class="form-group">
-                <label>Superficie oggetto intervento (m²):</label>
+                ${labelWithInfo('Superficie oggetto intervento (m²)', 'Superficie totale delle finestre/porte-finestre da sostituire. Si calcola: larghezza × altezza di ogni serramento, poi si sommano tutti.')}
                 <input type="number" id="superficie" min="0" step="0.01" required>
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label>Costo specifico sostenuto (€/m²):</label>
+                ${labelWithInfo('Costo specifico sostenuto (€/m²)', 'Costo medio per metro quadro di serramento installato. Si calcola: spesa totale ÷ superficie totale.')}
                 <input type="number" id="costoSpecifico" min="0" step="0.01" required>
             </div>
             <div class="form-group">
-                <label>Spesa totale sostenuta (€):</label>
+                ${labelWithInfo('Spesa totale sostenuta (€)', 'Costo complessivo per acquisto e posa di tutti i serramenti, IVA inclusa. Usato per il vincolo del 65%.')}
                 <input type="number" id="spesaTotale" min="0" step="0.01" required>
             </div>
         </div>
@@ -452,7 +452,7 @@ function getFormA3() {
         </div>
 
         <div class="form-group">
-            <label>Tipologia:</label>
+            ${labelWithInfo('Tipologia', 'Schermature Solari: tende, veneziane, frangisole esterni che bloccano il sole. Sistemi di Filtrazione: pellicole o vetri speciali che filtrano i raggi solari mantenendo la trasparenza.')}
             <select id="tipoSchermatura">
                 <option value="schermatura">Schermature Solari</option>
                 <option value="filtrazione">Sistemi di Filtrazione</option>
@@ -461,17 +461,17 @@ function getFormA3() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Superficie schermata (m²):</label>
+                ${labelWithInfo('Superficie schermata (m²)', 'Area totale delle finestre coperte dalle schermature o dai sistemi di filtrazione. Corrisponde alla superficie vetrata protetta.')}
                 <input type="number" id="superficie" min="0" step="0.01" required>
             </div>
             <div class="form-group">
-                <label>Costo specifico sostenuto (€/m²):</label>
+                ${labelWithInfo('Costo specifico sostenuto (€/m²)', 'Costo medio per metro quadro di schermatura installata. Include sistema, motorizzazione se automatico, installazione.')}
                 <input type="number" id="costoSpecifico" min="0" step="0.01" required>
             </div>
         </div>
 
         <div class="form-group">
-            <label>Spesa totale sostenuta (€):</label>
+            ${labelWithInfo('Spesa totale sostenuta (€)', 'Costo complessivo per tutti i sistemi di schermatura/filtrazione, IVA inclusa. Usato per calcolare il vincolo del 65%.')}
             <input type="number" id="spesaTotale" min="0" step="0.01" required>
         </div>
 
@@ -513,7 +513,7 @@ function getFormA4() {
         </div>
 
         <div class="form-group">
-            <label>Zona Climatica:</label>
+            ${labelWithInfo('Zona Climatica', 'Zona climatica del comune. Influenza i requisiti di efficienza energetica da rispettare per ottenere la certificazione NZEB.')}
             <select id="zonaClimatica">
                 ${ZONE_CLIMATICHE.map(z => `<option value="${z}">${z}</option>`).join('')}
             </select>
@@ -521,17 +521,17 @@ function getFormA4() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Superficie utile edificio (m²):</label>
+                ${labelWithInfo('Superficie utile edificio (m²)', 'Superficie utile riscaldata dell\'edificio (superficie netta calpestabile, esclusi muri e vani tecnici). Si trova nell\'APE alla voce "Superficie utile".')}
                 <input type="number" id="superficieEdificio" min="0" step="0.01" required>
             </div>
             <div class="form-group">
-                <label>Costo specifico sostenuto (€/m²):</label>
+                ${labelWithInfo('Costo specifico sostenuto (€/m²)', 'Costo dell\'intervento di ristrutturazione al metro quadro. Calcolato come: spesa totale ÷ superficie utile. Include tutti i lavori: coibentazione, impianti, serramenti.')}
                 <input type="number" id="costoSpecifico" min="0" step="0.01" required>
             </div>
         </div>
 
         <div class="form-group">
-            <label>Spesa totale sostenuta (€):</label>
+            ${labelWithInfo('Spesa totale sostenuta (€)', 'Costo complessivo della ristrutturazione/demolizione-ricostruzione per trasformare l\'edificio in NZEB. Include tutte le opere edilizie ed impiantistiche, IVA inclusa.')}
             <input type="number" id="spesaTotale" min="0" step="0.01" required>
         </div>
 
@@ -563,7 +563,7 @@ function getFormA5() {
         </div>
 
         <div class="form-group">
-            <label>Ambito:</label>
+            <label>${labelWithInfo('Ambito', 'Specifica se l\'intervento riguarda l\'illuminazione <b>interna</b> agli edifici (uffici, spazi comuni) o <b>esterna</b> (aree pertinenziali come parcheggi, cortili, viali). L\'ambito determina i requisiti minimi di CRI richiesti.')}</label>
             <select id="ambitoIlluminazione">
                 <option value="interno">Illuminazione Interna</option>
                 <option value="esterno">Illuminazione Esterna/Pertinenze</option>
@@ -572,11 +572,11 @@ function getFormA5() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Potenza precedente sostituita (kW):</label>
+                <label>${labelWithInfo('Potenza precedente sostituita (kW)', 'Potenza totale del sistema di illuminazione esistente che viene sostituito. Si calcola sommando la potenza nominale di tutte le lampade e apparecchi rimossi. <b>Esempio:</b> 50 lampade fluorescenti da 40W = 2 kW.')}</label>
                 <input type="number" id="potenzaPrecedente" min="0" step="0.01" required>
             </div>
             <div class="form-group">
-                <label>Potenza nuova installata (kW):</label>
+                <label>${labelWithInfo('Potenza nuova installata (kW)', 'Potenza totale del nuovo sistema LED installato. <b>Requisito obbligatorio:</b> deve essere ≤ 50% della potenza precedente per dimostrare un risparmio energetico significativo. <b>Esempio:</b> se la potenza precedente era 2 kW, la nuova deve essere ≤ 1 kW.')}</label>
                 <input type="number" id="potenzaNuova" min="0" step="0.01" required>
                 <small id="potenza-info" class="info-text" style="color: #006B68;">Max 50% della potenza precedente</small>
             </div>
@@ -584,19 +584,19 @@ function getFormA5() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Efficienza luminosa (lm/W):</label>
+                <label>${labelWithInfo('Efficienza luminosa (lm/W)', 'Rapporto tra flusso luminoso emesso (lumen) e potenza assorbita (Watt). Indica quanto è efficiente la lampada LED. <b>Minimo richiesto:</b> 80 lm/W. <b>Valori tipici LED:</b> 90-150 lm/W. Si trova nella scheda tecnica del produttore.')}</label>
                 <input type="number" id="efficienzaLuminosa" min="80" step="1" required>
                 <small class="info-text" style="color: #006B68;">Minimo: 80 lm/W</small>
             </div>
             <div class="form-group">
-                <label id="labelCRI">CRI (Indice Resa Cromatica):</label>
+                <label id="labelCRI">${labelWithInfo('CRI (Indice Resa Cromatica)', 'Misura la capacità di una sorgente luminosa di riprodurre fedelmente i colori. Scala 0-100. <b>Requisiti:</b> CRI >80 per illuminazione interna, CRI >60 per illuminazione esterna. <b>Riferimento:</b> luce naturale = 100.')}</label>
                 <input type="number" id="cri" min="60" step="1" required>
                 <small id="cri-info" class="info-text" style="color: #006B68;">Minimo: >80 (interni)</small>
             </div>
         </div>
 
         <div class="form-group">
-            <label>Spesa totale sostenuta (€):</label>
+            <label>${labelWithInfo('Spesa totale sostenuta (€)', 'Costo totale dell\'intervento comprensivo di: <b>fornitura e posa</b> delle nuove lampade LED, <b>smaltimento</b> del sistema esistente, <b>eventuale adeguamento</b> degli apparecchi. Include IVA e oneri di progettazione/direzione lavori.')}</label>
             <input type="number" id="spesaTotale" min="0" step="0.01" required>
         </div>
 
@@ -634,17 +634,17 @@ function getFormA6() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Superficie utile edificio (m²):</label>
+                <label>${labelWithInfo('Superficie utile edificio (m²)', 'Superficie utile riscaldata dell\'edificio in cui viene installato il sistema di Building Automation. Si considera la superficie netta calpestabile degli ambienti climatizzati. <b>Non include:</b> muri, pilastri, vani tecnici non riscaldati.')}</label>
                 <input type="number" id="superficieEdificio" min="0" step="0.01" required>
             </div>
             <div class="form-group">
-                <label>Costo specifico sostenuto (€/m²):</label>
+                <label>${labelWithInfo('Costo specifico sostenuto (€/m²)', 'Costo unitario dell\'intervento per metro quadrato di superficie. Si calcola dividendo la spesa totale per la superficie utile. <b>Esempio:</b> se spesa = 10.000€ e superficie = 500 m², costo specifico = 20 €/m².')}</label>
                 <input type="number" id="costoSpecifico" min="0" step="0.01" required>
             </div>
         </div>
 
         <div class="form-group">
-            <label>Spesa totale sostenuta (€):</label>
+            <label>${labelWithInfo('Spesa totale sostenuta (€)', 'Costo totale dell\'intervento comprensivo di: <b>fornitura e installazione</b> del sistema di automazione (sensori, attuatori, unità di controllo), <b>integrazione</b> con impianti esistenti, <b>software di gestione</b>, messa in servizio. Include IVA e oneri professionali.')}</label>
             <input type="number" id="spesaTotale" min="0" step="0.01" required>
         </div>
 
@@ -838,7 +838,7 @@ function getFormB1() {
         </div>
 
         <div class="form-group">
-            <label>Tipologia Pompa di Calore:</label>
+            <label>${labelWithInfo('Tipologia Pompa di Calore', '<b>Aria-Acqua BT:</b> preleva calore dall\'aria esterna, produce acqua 35-45°C (impianti radianti). <b>Aria-Acqua MT:</b> acqua 55-65°C (radiatori tradizionali). <b>Acqua-Acqua:</b> sfrutta falda acquifera/geotermia (alta efficienza). <b>Pompa a Gas:</b> funziona a metano invece che elettricamente.')}</label>
             <select id="tipoPDC">
                 <option value="aria-acqua_BT">Aria-Acqua Bassa Temperatura</option>
                 <option value="aria-acqua_MT">Aria-Acqua Media Temperatura</option>
@@ -848,7 +848,7 @@ function getFormB1() {
         </div>
 
         <div class="form-group">
-            <label>Zona Climatica:</label>
+            <label>${labelWithInfo('Zona Climatica', 'L\'Italia è divisa in 6 zone climatiche (A-F) in base ai gradi giorno. Influenza i coefficienti di calcolo dell\'incentivo. <b>Esempi:</b> Zona A (Lampedusa), Zona C (Roma, Napoli), Zona E (Milano, Bologna), Zona F (Cuneo, Trento). Si trova nei dati climatici del comune.')}</label>
             <select id="zonaClimatica">
                 ${ZONE_CLIMATICHE.map(z => `<option value="${z}">${z}</option>`).join('')}
             </select>
@@ -856,24 +856,24 @@ function getFormB1() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Potenza nominale (kW):</label>
+                <label>${labelWithInfo('Potenza nominale (kW)', 'Potenza termica utile della pompa di calore in regime di riscaldamento. Si trova nella scheda tecnica del produttore o nella targa dell\'apparecchio. <b>Esempio:</b> 12 kW per abitazione 100-150 m². Influisce direttamente sul calcolo dell\'energia termica incentivabile.')}</label>
                 <input type="number" id="potenza" min="0" step="0.01" required>
             </div>
             <div class="form-group">
-                <label id="labelSCOP">SCOP (Coefficiente Prestazione Stagionale):</label>
+                <label id="labelSCOP">${labelWithInfo('SCOP (Coefficiente Prestazione Stagionale)', 'Seasonal Coefficient of Performance: rapporto tra energia termica fornita ed energia elettrica consumata nell\'intera stagione di riscaldamento. <b>Valori tipici:</b> 3,0-5,0. Più alto = più efficiente. <b>Requisiti minimi:</b> variano per tipologia (BT: ≥3,0, MT: ≥2,6).')}</label>
                 <input type="number" id="scop" min="0" step="0.01" required>
                 <small id="scop-info" class="info-text"></small>
             </div>
         </div>
 
         <div class="form-group">
-            <label>Efficienza energetica riscaldamento stagionale ηs (%):</label>
+            <label>${labelWithInfo('Efficienza energetica riscaldamento stagionale ηs (%)', 'Efficienza del sistema completo (pompa di calore + circolatore + controlli) calcolata secondo Regolamento UE 813/2013. Include tutte le perdite del sistema. <b>Valori tipici:</b> 110%-200% (>100% perché pompa di calore recupera calore dall\'ambiente). <b>Requisiti minimi:</b> variano per tipologia e potenza.')}</label>
             <input type="number" id="eta_s" min="0" step="1" required>
             <small id="eta-info" class="info-text"></small>
         </div>
 
         <div class="form-group">
-            <label>Spesa totale sostenuta (€):</label>
+            <label>${labelWithInfo('Spesa totale sostenuta (€)', 'Costo totale dell\'intervento comprensivo di: <b>fornitura e installazione</b> pompa di calore, <b>smontaggio</b> vecchio generatore, <b>adeguamento</b> impianto idraulico/elettrico, <b>terminali</b> se necessari, opere murarie, messa in servizio. Include IVA e oneri professionali (progettazione, direzione lavori).')}</label>
             <input type="number" id="spesaTotale" min="0" step="0.01" required>
         </div>
 
@@ -921,7 +921,7 @@ function getFormB2() {
         </div>
 
         <div class="form-group">
-            <label>Tipologia Sistema:</label>
+            <label>${labelWithInfo('Tipologia Sistema', '<b>Ibrido Factory Made:</b> pompa di calore + caldaia condensazione progettati e assemblati in fabbrica come sistema unico (k=1.25, incentivo maggiorato). <b>Bivalente:</b> sistemi assemblati in cantiere. Se potenza ≤35 kW → k=1.0, se >35 kW → k=1.1. Coefficiente "k" aumenta l\'incentivo.')}</label>
             <select id="tipoSistema">
                 <option value="ibrido-fm">Ibrido Factory Made (k=1.25)</option>
                 <option value="bivalente-35">Bivalente ≤35 kW (k=1.0)</option>
@@ -930,7 +930,7 @@ function getFormB2() {
         </div>
 
         <div class="form-group">
-            <label>Zona Climatica:</label>
+            <label>${labelWithInfo('Zona Climatica', 'L\'Italia è divisa in 6 zone climatiche (A-F) in base ai gradi giorno. Influenza i coefficienti di calcolo dell\'incentivo. <b>Esempi:</b> Zona A (Lampedusa), Zona C (Roma, Napoli), Zona E (Milano, Bologna), Zona F (Cuneo, Trento). Si trova nei dati climatici del comune.')}</label>
             <select id="zonaClimatica">
                 ${ZONE_CLIMATICHE.map(z => `<option value="${z}">${z}</option>`).join('')}
             </select>
@@ -938,11 +938,11 @@ function getFormB2() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Potenza nominale pompa di calore (kW):</label>
+                <label>${labelWithInfo('Potenza nominale pompa di calore (kW)', 'Potenza termica nominale della sola pompa di calore (non della caldaia) del sistema ibrido. Si utilizza per calcolare l\'energia termica prodotta incentivabile. Si trova nella scheda tecnica del sistema. <b>Nota:</b> nei sistemi ibridi la pompa lavora prioritariamente, la caldaia interviene in backup.')}</label>
                 <input type="number" id="potenza" min="0" step="0.01" required>
             </div>
             <div class="form-group">
-                <label>SCOP Pompa di Calore:</label>
+                <label>${labelWithInfo('SCOP Pompa di Calore', 'Coefficiente di prestazione stagionale della pompa di calore del sistema ibrido. <b>Requisito minimo:</b> SCOP ≥3.1 (condizioni media temperatura). Indica l\'efficienza della pompa nel corso dell\'intera stagione di riscaldamento. Più alto = più efficiente.')}</label>
                 <input type="number" id="scop" min="3.1" step="0.01" required>
                 <small class="info-text" style="color: #006B68;">Valore minimo: 3.1 (media temp.)</small>
             </div>
@@ -950,12 +950,12 @@ function getFormB2() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Efficienza stagionale caldaia ηs (%):</label>
+                <label>${labelWithInfo('Efficienza stagionale caldaia ηs (%)', 'Efficienza stagionale della caldaia a condensazione integrata nel sistema ibrido. <b>Requisito minimo:</b> ηs ≥90%. La caldaia deve essere obbligatoriamente a condensazione per accedere all\'incentivo. Si trova nella scheda prodotto secondo Regolamento UE 813/2013.')}</label>
                 <input type="number" id="eta_caldaia" min="90" step="1" required>
                 <small class="info-text" style="color: #006B68;">Valore minimo: 90%</small>
             </div>
             <div class="form-group">
-                <label>Spesa totale sostenuta (€):</label>
+                <label>${labelWithInfo('Spesa totale sostenuta (€)', 'Costo totale dell\'intervento comprensivo di: <b>fornitura e installazione</b> sistema ibrido completo (PDC+caldaia), <b>smontaggio</b> vecchio generatore, <b>adeguamento</b> impianto idraulico/elettrico, sistema di regolazione e controllo, opere murarie. Include IVA e oneri professionali.')}</label>
                 <input type="number" id="spesaTotale" min="0" step="0.01" required>
             </div>
         </div>
@@ -987,11 +987,11 @@ function getFormB3() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Potenza nominale (kWt):</label>
+                <label>${labelWithInfo('Potenza nominale (kWt)', 'Potenza termica nominale del generatore a biomassa (pellet, legna, cippato). Unità: kWt (kilowatt termici). Si trova nella targa e scheda tecnica del produttore. <b>Esempio:</b> 25 kWt per edificio 200-250 m². Determina il calcolo dell\'energia termica incentivabile.')}</label>
                 <input type="number" id="potenza" min="0" step="0.1" required>
             </div>
             <div class="form-group">
-                <label>Rendimento termico utile (%):</label>
+                <label>${labelWithInfo('Rendimento termico utile (%)', 'Efficienza di conversione da biomassa a calore utile. <b>Requisito minimo:</b> ηu ≥ 87% + log(Pn) dove Pn è potenza nominale in kW. <b>Esempio:</b> per caldaia 25 kW → minimo 88,4%. Valori tipici: 90-95%. Si trova nella certificazione del prodotto.')}</label>
                 <input type="number" id="rendimento" min="0" step="0.1" required>
                 <small id="rend-info" class="info-text" style="color: #006B68;"></small>
             </div>
@@ -999,21 +999,21 @@ function getFormB3() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Certificazione ambientale (stelle):</label>
+                <label>${labelWithInfo('Certificazione ambientale (stelle)', 'Classificazione secondo DM 186/2017 ("Conto Aria") basata su emissioni inquinanti. <b>Requisito minimo:</b> 5 stelle. 5+ stelle = prestazioni ancora superiori con emissioni ridottissime. La certificazione è obbligatoria e rilasciata in base a test di laboratorio.')}</label>
                 <select id="certificazione">
                     <option value="5">5 stelle</option>
                     <option value="5+">5+ stelle</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>Accumulo termico (dm³/kWt):</label>
+                <label>${labelWithInfo('Accumulo termico (dm³/kWt)', 'Volume del puffer/accumulo termico in rapporto alla potenza. <b>Requisito minimo:</b> 20 dm³/kWt (20 litri per kW). <b>Esempio:</b> caldaia 25 kW richiede accumulo ≥500 litri. Essenziale per ottimizzare combustione e ridurre cicli on/off.')}</label>
                 <input type="number" id="accumulo" min="20" step="1" required>
                 <small class="info-text" style="color: #006B68;">Minimo: 20 dm³/kWt</small>
             </div>
         </div>
 
         <div class="form-group">
-            <label>Spesa totale sostenuta (€):</label>
+            <label>${labelWithInfo('Spesa totale sostenuta (€)', 'Costo totale dell\'intervento comprensivo di: <b>generatore biomassa</b> certificato, <b>accumulo termico/puffer</b>, <b>smontaggio</b> vecchio impianto, <b>canna fumaria</b> se necessaria, opere idrauliche/murarie, valvole termiche, messa in servizio. Include IVA e oneri professionali. <b>Nota:</b> impegno manutenzione biennale per tutta durata incentivo.')}</label>
             <input type="number" id="spesaTotale" min="0" step="0.01" required>
         </div>
 
@@ -1059,7 +1059,7 @@ function getFormB4() {
         </div>
 
         <div class="form-group">
-            <label>Tipologia Impianto:</label>
+            <label>${labelWithInfo('Tipologia Impianto', '<b>Produzione ACS:</b> solo acqua calda sanitaria. <b>Integrazione riscaldamento:</b> supporto al riscaldamento ambienti + ACS. <b>Solar Cooling:</b> raffrescamento tramite macchine ad assorbimento alimentate da solare termico. <b>Processi produttivi:</b> calore per industria/agricoltura. La tipologia influenza i coefficienti di calcolo.')}</label>
             <select id="tipoImpianto">
                 <option value="acs">Produzione ACS</option>
                 <option value="integrazione">Integrazione riscaldamento</option>
@@ -1069,7 +1069,7 @@ function getFormB4() {
         </div>
 
         <div class="form-group">
-            <label>Tipo Collettori:</label>
+            <label>${labelWithInfo('Tipo Collettori', '<b>Collettori Piani:</b> tecnologia standard, costo contenuto, buona efficienza fino 80°C. <b>Collettori Sottovuoto:</b> maggiore efficienza, migliori con basse temperature esterne/alte temp. richieste. <b>Collettori a Concentrazione:</b> per processi industriali ad alta temperatura (>100°C). Tipo influenza producibilità minima richiesta.')}</label>
             <select id="tipoCollettori">
                 <option value="piani">Collettori Piani</option>
                 <option value="sottovuoto">Collettori Sottovuoto</option>
@@ -1079,18 +1079,18 @@ function getFormB4() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Superficie lorda collettori (m²):</label>
+                <label>${labelWithInfo('Superficie lorda collettori (m²)', 'Superficie totale lorda (con telaio) dei pannelli solari termici installati. Si trova nelle schede tecniche. <b>Dimensionamento tipico ACS:</b> 1-1.5 m²/persona. <b>Esempio:</b> famiglia 4 persone → 5-6 m². La superficie determina l\'energia termica producibile incentivabile.')}</label>
                 <input type="number" id="superficieCollettori" min="0" step="0.01" required>
             </div>
             <div class="form-group">
-                <label>Producibilità specifica (kWht/m²·anno):</label>
+                <label>${labelWithInfo('Producibilità specifica (kWht/m²·anno)', 'Energia termica producibile per m² di collettore in un anno. <b>Requisiti minimi:</b> Piani ≥300 kWht/m²·anno, Sottovuoto ≥350, Concentrazione ≥400. Dipende da tipo collettore, orientamento, inclinazione, località. Si calcola con software certificati (es. SOL, T-SOL).')}</label>
                 <input type="number" id="producibilita" min="300" step="1" required>
                 <small class="info-text" style="color: #006B68;">Minimo: 300 kWht/m²·anno (piani)</small>
             </div>
         </div>
 
         <div class="form-group">
-            <label>Spesa totale sostenuta (€):</label>
+            <label>${labelWithInfo('Spesa totale sostenuta (€)', 'Costo totale dell\'intervento comprensivo di: <b>collettori solari</b> certificati Solar Keymark, <b>accumulo/bollitore</b> solare, <b>centralina e sonde</b>, gruppo pompaggio, tubazioni e coibentazione, valvole, antigelo, opere idrauliche/edili, posa e messa in servizio. Include IVA e oneri professionali.')}</label>
             <input type="number" id="spesaTotale" min="0" step="0.01" required>
         </div>
 
@@ -1118,7 +1118,7 @@ function getFormB5() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Classe Energetica:</label>
+                <label>${labelWithInfo('Classe Energetica', 'Classificazione efficienza energetica secondo Regolamento UE 812/2013 per scaldacqua. <b>Requisito minimo:</b> Classe A. <b>Classi superiori:</b> A+, A++, A+++ indicano consumi sempre più ridotti. Si trova nell\'etichetta energetica obbligatoria. Classe influenza l\'incentivo.')}</label>
                 <select id="classeEnergetica">
                     <option value="A">Classe A</option>
                     <option value="A+">Classe A+</option>
@@ -1126,13 +1126,13 @@ function getFormB5() {
                 </select>
             </div>
             <div class="form-group">
-                <label>Capacità (litri):</label>
+                <label>${labelWithInfo('Capacità (litri)', 'Volume del serbatoio di accumulo dell\'acqua calda. <b>Dimensionamento tipico:</b> 50-80 litri/persona. <b>Esempio:</b> famiglia 4 persone → 200-300 litri. Capacità maggiore = più autonomia ma spazio maggiore. Si trova nella scheda tecnica.')}</label>
                 <input type="number" id="capacita" min="0" step="1" required>
             </div>
         </div>
 
         <div class="form-group">
-            <label>Spesa totale sostenuta (€):</label>
+            <label>${labelWithInfo('Spesa totale sostenuta (€)', 'Costo totale dell\'intervento comprensivo di: <b>scaldacqua a pompa di calore</b> certificato classe A minimo, <b>smontaggio</b> vecchio scaldacqua elettrico/gas, <b>adeguamento</b> allacciamenti idraulici/elettrici, eventuale condensa/scarico, opere murarie. Include IVA e oneri professionali.')}</label>
             <input type="number" id="spesaTotale" min="0" step="0.01" required>
         </div>
 
@@ -1155,17 +1155,17 @@ function getFormB6() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Potenza nominale sottostazione (kW):</label>
+                <label>${labelWithInfo('Potenza nominale sottostazione (kW)', 'Potenza termica massima della sottostazione di scambio che collega l\'edificio alla rete di teleriscaldamento. Dimensionata in base al fabbisogno termico dell\'edificio. <b>Esempio:</b> edificio 500 m² → 50-80 kW. Si trova nel progetto tecnico dell\'allaccio.')}</label>
                 <input type="number" id="potenza" min="0" step="0.01" required>
             </div>
             <div class="form-group">
-                <label>Costo specifico sostenuto (€/kW):</label>
+                <label>${labelWithInfo('Costo specifico sostenuto (€/kW)', 'Costo unitario dell\'allaccio per kW di potenza. Si calcola dividendo la spesa totale per la potenza. <b>Esempio:</b> spesa 8.000€, potenza 80 kW → costo specifico 100 €/kW. Utile per confrontare economicità dell\'intervento.')}</label>
                 <input type="number" id="costoSpecifico" min="0" step="0.01" required>
             </div>
         </div>
 
         <div class="form-group">
-            <label>Spesa totale sostenuta (€):</label>
+            <label>${labelWithInfo('Spesa totale sostenuta (€)', 'Costo totale dell\'allaccio comprensivo di: <b>sottostazione di scambio</b> termica, <b>tubazioni</b> di collegamento edificio-rete, <b>smontaggio</b> vecchio generatore, <b>contabilizzatore</b> calore, valvole, opere edili, messa in servizio. Include IVA e oneri professionali. <b>Requisito:</b> rete deve essere "efficiente" secondo ARERA.')}</label>
             <input type="number" id="spesaTotale" min="0" step="0.01" required>
         </div>
 
@@ -1198,19 +1198,19 @@ function getFormB7() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Potenza elettrica (kWe):</label>
+                <label>${labelWithInfo('Potenza elettrica (kWe)', 'Potenza elettrica generata dal microcogeneratore. <b>Limite massimo:</b> 50 kWe (oltre = cogenerazione, non micro). Unità: kWe (kilowatt elettrici). Si trova nella scheda tecnica. <b>Esempio:</b> 20 kWe per piccola utenza industriale/grande edificio.')}</label>
                 <input type="number" id="potenzaElettrica" min="0" max="50" step="0.1" required>
                 <small class="info-text" style="color: #006B68;">Massimo: 50 kWe</small>
             </div>
             <div class="form-group">
-                <label>Potenza termica (kWt):</label>
+                <label>${labelWithInfo('Potenza termica (kWt)', 'Potenza termica recuperata dal microcogeneratore. Il calore di scarto del motore viene recuperato per riscaldamento/ACS. Unità: kWt (kilowatt termici). <b>Tipico rapporto:</b> 1 kWe produce 1,5-2 kWt. <b>Esempio:</b> 20 kWe → 30-40 kWt.')}</label>
                 <input type="number" id="potenzaTermica" min="0" step="0.1" required>
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label>Fonte rinnovabile:</label>
+                <label>${labelWithInfo('Fonte rinnovabile', 'Combustibile utilizzato dal microcogeneratore. <b>Biomassa:</b> pellet/cippato solidi. <b>Biogas:</b> gas da digestione anaerobica (es. da depuratori, allevamenti). <b>Bioliquidi:</b> oli vegetali. <b>Requisito obbligatorio:</b> solo fonti rinnovabili, NO metano/GPL.')}</label>
                 <select id="fonteRinnovabile">
                     <option value="biomassa">Biomassa</option>
                     <option value="biogas">Biogas</option>
@@ -1218,14 +1218,14 @@ function getFormB7() {
                 </select>
             </div>
             <div class="form-group">
-                <label>PES - Risparmio Energetico Primario (%):</label>
+                <label>${labelWithInfo('PES - Risparmio Energetico Primario (%)', 'Primary Energy Saving: risparmio di energia primaria rispetto a produzione separata di elettricità e calore. <b>Requisito minimo:</b> PES ≥10%. Si calcola secondo Direttiva 2012/27/UE. <b>Esempio:</b> PES 15% = risparmio 15% energia rispetto a caldaia+rete elettrica. Maggiore efficienza complessiva.')}</label>
                 <input type="number" id="pes" min="10" step="0.1" required>
                 <small class="info-text" style="color: #006B68;">Minimo: 10%</small>
             </div>
         </div>
 
         <div class="form-group">
-            <label>Spesa totale sostenuta (€):</label>
+            <label>${labelWithInfo('Spesa totale sostenuta (€)', 'Costo totale dell\'intervento comprensivo di: <b>microcogeneratore</b> certificato, <b>motore/turbina</b> e scambiatore calore, <b>sistema controllo</b> elettrico/termico, <b>smontaggio</b> impianto precedente, <b>allacciamenti</b> elettrici/termici, opere edili, messa in servizio. Include IVA e oneri professionali. <b>Requisito:</b> alimentazione esclusiva da fonti rinnovabili.')}</label>
             <input type="number" id="spesaTotale" min="0" step="0.01" required>
         </div>
 
