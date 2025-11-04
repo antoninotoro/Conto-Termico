@@ -1394,7 +1394,7 @@ function calcolaIncentivoPompaDiCalore(zonaClimatica) {
 }
 
 // Funzione principale di calcolo
-// Funzione helper per calcolare incentivo teorico (100% per comuni/edifici pubblici)
+// Funzione helper per calcolare incentivo teorico in base al soggetto
 function calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale) {
     const soggetto = document.getElementById('soggetto-richiedente').value;
 
@@ -1403,7 +1403,14 @@ function calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale) {
         return spesaTotale;
     }
 
-    // Per tutti gli altri: incentivo calcolato normalmente
+    // Per imprese: calcolo diretto con percentuale impresa (NON % intervento)
+    // Le percentuali 25%/30%/45% + maggiorazioni si applicano direttamente ai costi ammissibili
+    if (soggetto && soggetto.startsWith('impresa_')) {
+        const massimale = getMassimaleSoggetto();
+        return spesaTotale * massimale.percentuale;
+    }
+
+    // Per privati e PA: calcolo normale con % intervento (limite 65% applicato dopo)
     return incentivoCalcolato;
 }
 
