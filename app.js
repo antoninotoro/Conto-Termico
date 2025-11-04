@@ -113,9 +113,10 @@ function mostraFormIntervento() {
 }
 
 // Helper: Form Pompa di Calore per multi-intervento (con prefisso ID personalizzato)
-function getFormPompaDiCaloreAbbinata() {
+function getFormPompaDiCaloreAbbinata(mostraDefault = false) {
+    const displayStyle = mostraDefault ? 'block' : 'none';
     return `
-        <div id="pdc-section" style="display:none; margin-top: 30px; padding: 20px; background: #E8F4F3; border-radius: 8px; border-left: 4px solid #00A19C;">
+        <div id="pdc-section" style="display:${displayStyle}; margin-top: 30px; padding: 20px; background: #E8F4F3; border-radius: 8px; border-left: 4px solid #00A19C;">
             <h3 style="color: #00A19C;">Pompa di Calore Abbinata (Art. 8 - B.1)</h3>
 
             <div class="info">
@@ -641,10 +642,11 @@ function getFormA7() {
             <label for="smart">Colonnine "smart" con funzionalità di misura, registrazione e trasmissione (obbligatorio)</label>
         </div>
 
-        ${getFormPompaDiCaloreAbbinata()}
+        ${getFormPompaDiCaloreAbbinata(true)}
 
         <script>
-            document.getElementById('abbinamentoPC').addEventListener('change', togglePDCSectionA7);
+            // Mostra automaticamente la sezione PDC dato che è obbligatoria
+            // document.getElementById('abbinamentoPC').addEventListener('change', togglePDCSectionA7);
 
             function togglePDCSectionA7() {
                 const abbinamentoPC = document.getElementById('abbinamentoPC').checked;
@@ -720,10 +722,11 @@ function getFormA8() {
             <label for="garanziaModuli">Garanzia moduli 90% dopo 10 anni (obbligatorio)</label>
         </div>
 
-        ${getFormPompaDiCaloreAbbinata()}
+        ${getFormPompaDiCaloreAbbinata(true)}
 
         <script>
-            document.getElementById('abbinamentoPC_A8').addEventListener('change', togglePDCSectionA8);
+            // Mostra automaticamente la sezione PDC dato che è obbligatoria
+            // document.getElementById('abbinamentoPC_A8').addEventListener('change', togglePDCSectionA8);
 
             function togglePDCSectionA8() {
                 const abbinamentoPC = document.getElementById('abbinamentoPC_A8').checked;
