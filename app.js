@@ -1359,7 +1359,8 @@ function calcolaIncentivoPompaDiCalore(zonaClimatica) {
     const Is = Qu * Ci;
 
     // Calcolo incentivo
-    const incentivoTeorico = Is;
+    const incentivoCalcolato = Is;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
     const Imax = potenza <= 35 ? 700 * potenza : 65000;
     const massimale = getMassimaleSoggetto();
     const limiteMassimale = spesaTotale * massimale.percentuale;
@@ -1393,6 +1394,19 @@ function calcolaIncentivoPompaDiCalore(zonaClimatica) {
 }
 
 // Funzione principale di calcolo
+// Funzione helper per calcolare incentivo teorico (100% per comuni/edifici pubblici)
+function calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale) {
+    const soggetto = document.getElementById('soggetto-richiedente').value;
+
+    // Per comuni piccoli ed edifici pubblici: 100% spesa sostenuta
+    if (soggetto === 'comune_piccolo' || soggetto === 'edificio_pubblico') {
+        return spesaTotale;
+    }
+
+    // Per tutti gli altri: incentivo calcolato normalmente
+    return incentivoCalcolato;
+}
+
 // Funzione per calcolare il massimale in base al soggetto richiedente
 function getMassimaleSoggetto() {
     const soggettoSelect = document.getElementById('soggetto-richiedente');
@@ -1582,12 +1596,15 @@ function calcolaA1() {
         percSpesa += 0.10;
     }
 
-    // Calcolo incentivo teorico
-    const incentivoTeorico = percSpesa * costoSpecifico * superficie;
+    // Calcolo incentivo teorico (normale o 100% per soggetti speciali)
+    const incentivoCalcolato = percSpesa * costoSpecifico * superficie;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
+
+    // Ottieni massimale soggetto
+    const massimale = getMassimaleSoggetto();
 
     // Applicazione vincoli con massimale soggetto
     const Imax = 1000000; // €
-    const massimale = getMassimaleSoggetto();
     const limiteMassimale = spesaTotale * massimale.percentuale;
 
     const incentivoFinale = Math.min(incentivoTeorico, Imax, limiteMassimale);
@@ -1659,7 +1676,8 @@ function calcolaA2() {
     }
 
     // Calcolo incentivo teorico
-    const incentivoTeorico = percSpesa * costoAmmissibile * superficie;
+    const incentivoCalcolato = percSpesa * costoAmmissibile * superficie;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
 
     // Applicazione vincoli
     const Imax = 500000;
@@ -1726,7 +1744,8 @@ function calcolaA3() {
     }
 
     // Calcolo incentivo teorico
-    const incentivoTeorico = percSpesa * costoSpecifico * superficie;
+    const incentivoCalcolato = percSpesa * costoSpecifico * superficie;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
 
     // Applicazione vincoli
     const Imax = 200000; // € (stima)
@@ -1783,7 +1802,8 @@ function calcolaA4() {
     }
 
     // Calcolo incentivo teorico
-    const incentivoTeorico = percSpesa * costoAmmissibile * superficie;
+    const incentivoCalcolato = percSpesa * costoAmmissibile * superficie;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
 
     // Applicazione vincoli
     const Imax = ['A', 'B', 'C'].includes(zonaClimatica) ? 2500000 : 3000000;
@@ -1858,7 +1878,8 @@ function calcolaA5() {
     }
 
     // Calcolo incentivo teorico
-    const incentivoTeorico = percSpesa * spesaTotale;
+    const incentivoCalcolato = percSpesa * spesaTotale;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
 
     // Applicazione vincoli
     const Imax = 150000; // € (stima)
@@ -1916,7 +1937,8 @@ function calcolaA6() {
     }
 
     // Calcolo incentivo teorico
-    const incentivoTeorico = percSpesa * costoAmmissibile * superficie;
+    const incentivoCalcolato = percSpesa * costoAmmissibile * superficie;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
 
     // Applicazione vincoli
     const Imax = 100000;
@@ -1975,7 +1997,8 @@ function calcolaA7() {
 
     // Calcolo incentivo semplificato (40% della spesa)
     const percSpesa = 0.40;
-    const incentivoTeorico = percSpesa * spesaTotale;
+    const incentivoCalcolato = percSpesa * spesaTotale;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
 
     // Vincoli
     const Imax = 100000; // € (stima)
@@ -2067,7 +2090,9 @@ function calcolaA8() {
     // Calcolo incentivi
     const incentivoFV = 0.20 * costoAmmissibileFV;
     const incentivoAccumulo = 0.20 * costoAmmissibileAccumulo;
-    const incentivoTeorico = incentivoFV + incentivoAccumulo;
+    const incentivoCalcolato = incentivoFV + incentivoAccumulo;
+    const spesaTotaleFVAccumulo = spesaFV + spesaAccumulo;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotaleFVAccumulo);
 
     // Calcolo pompa di calore abbinata (obbligatoria per A.8)
     const incentivoPDC = calcolaIncentivoPompaDiCalore(zonaClimatica);
@@ -2144,7 +2169,8 @@ function calcolaB1() {
     const Ei = potenza * 2000 * Quf * ((scop - 1) / scop);
 
     // Incentivo totale
-    const incentivoTeorico = durataAnni * Ei * Ci;
+    const incentivoCalcolato = durataAnni * Ei * Ci;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
 
     // Applicazione vincoli
     const massimale = getMassimaleSoggetto();
@@ -2227,7 +2253,8 @@ function calcolaB2() {
     const Ei = potenza * 2000 * Quf * ((scop - 1) / scop);
 
     // Incentivo totale con coefficiente k
-    const incentivoTeorico = durataAnni * k * Ei * Ci;
+    const incentivoCalcolato = durataAnni * k * Ei * Ci;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
 
     // Applicazione vincoli
     const massimale = getMassimaleSoggetto();
@@ -2287,7 +2314,8 @@ function calcolaB3() {
     }
 
     // Calcolo semplificato: 65% della spesa
-    const incentivoTeorico = 0.65 * spesaTotale;
+    const incentivoCalcolato = 0.65 * spesaTotale;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
     const massimale = getMassimaleSoggetto();
     const limiteMassimale = spesaTotale * massimale.percentuale;
     const incentivoFinale = Math.min(incentivoTeorico, limiteMassimale);
@@ -2328,7 +2356,8 @@ function calcolaB4() {
     }
 
     // Calcolo semplificato: 65% della spesa
-    const incentivoTeorico = 0.65 * spesaTotale;
+    const incentivoCalcolato = 0.65 * spesaTotale;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
     const massimale = getMassimaleSoggetto();
     const limiteMassimale = spesaTotale * massimale.percentuale;
     const incentivoFinale = Math.min(incentivoTeorico, limiteMassimale);
@@ -2372,7 +2401,8 @@ function calcolaB5() {
     }
 
     // Calcolo incentivo
-    const incentivoTeorico = 0.40 * spesaTotale;
+    const incentivoCalcolato = 0.40 * spesaTotale;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
 
     // Applicazione vincoli
     const incentivoFinale = Math.min(incentivoTeorico, Imax);
@@ -2432,7 +2462,8 @@ function calcolaB6() {
     }
 
     // Calcolo incentivo
-    const incentivoTeorico = 0.65 * costoSpecifico * potenza;
+    const incentivoCalcolato = 0.65 * costoSpecifico * potenza;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
 
     // Applicazione vincoli
     const massimale = getMassimaleSoggetto();
@@ -2485,7 +2516,8 @@ function calcolaB7() {
     }
 
     // Calcolo semplificato: 65% della spesa
-    const incentivoTeorico = 0.65 * spesaTotale;
+    const incentivoCalcolato = 0.65 * spesaTotale;
+    const incentivoTeorico = calcolaIncentivoTeoricoConSoggetto(incentivoCalcolato, spesaTotale);
     const massimale = getMassimaleSoggetto();
     const limiteMassimale = spesaTotale * massimale.percentuale;
     const incentivoFinale = Math.min(incentivoTeorico, limiteMassimale);
