@@ -1367,7 +1367,7 @@ function calcolaIncentivoPompaDiCalore(zonaClimatica) {
 
     let vincoloApplicato = 'Nessun vincolo';
     if (incentivoFinale === Imax) vincoloApplicato = 'Imax = ' + Imax.toFixed(2) + ' €';
-    if (incentivoFinale === limite65) vincoloApplicato = '65% della spesa = ' + limite65.toFixed(2) + ' €';
+    if (incentivoFinale === limiteMassimale) vincoloApplicato = massimale.descrizione;
 
     const durataAnni = incentivoFinale <= 5000 ? 2 : 5;
     const rataAnnuale = incentivoFinale / durataAnni;
@@ -2150,7 +2150,7 @@ function calcolaB1() {
     const massimale = getMassimaleSoggetto();
     const limiteMassimale = spesaTotale * massimale.percentuale;
 
-    const incentivoFinale = Math.min(incentivoTeorico, limite65);
+    const incentivoFinale = Math.min(incentivoTeorico, limiteMassimale);
 
     const vincoloApplicato =
         incentivoFinale === limiteMassimale ? massimale.descrizione :
@@ -2233,7 +2233,7 @@ function calcolaB2() {
     const massimale = getMassimaleSoggetto();
     const limiteMassimale = spesaTotale * massimale.percentuale;
 
-    const incentivoFinale = Math.min(incentivoTeorico, limite65);
+    const incentivoFinale = Math.min(incentivoTeorico, limiteMassimale);
 
     const vincoloApplicato =
         incentivoFinale === limiteMassimale ? massimale.descrizione :
@@ -2290,7 +2290,7 @@ function calcolaB3() {
     const incentivoTeorico = 0.65 * spesaTotale;
     const massimale = getMassimaleSoggetto();
     const limiteMassimale = spesaTotale * massimale.percentuale;
-    const incentivoFinale = Math.min(incentivoTeorico, limite65);
+    const incentivoFinale = Math.min(incentivoTeorico, limiteMassimale);
 
     return {
         tipo: 'B.3 - Generatori Biomassa',
@@ -2331,7 +2331,7 @@ function calcolaB4() {
     const incentivoTeorico = 0.65 * spesaTotale;
     const massimale = getMassimaleSoggetto();
     const limiteMassimale = spesaTotale * massimale.percentuale;
-    const incentivoFinale = Math.min(incentivoTeorico, limite65);
+    const incentivoFinale = Math.min(incentivoTeorico, limiteMassimale);
 
     return {
         tipo: 'B.4 - Impianti Solari Termici',
@@ -2488,7 +2488,7 @@ function calcolaB7() {
     const incentivoTeorico = 0.65 * spesaTotale;
     const massimale = getMassimaleSoggetto();
     const limiteMassimale = spesaTotale * massimale.percentuale;
-    const incentivoFinale = Math.min(incentivoTeorico, limite65);
+    const incentivoFinale = Math.min(incentivoTeorico, limiteMassimale);
 
     return {
         tipo: 'B.7 - Microcogenerazione da Fonti Rinnovabili',
