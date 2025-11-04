@@ -41,6 +41,87 @@ const EFFICIENZA_MIN_PDC = {
 // Variabili globali
 let interventoSelezionato = null;
 let datiIntervento = {};
+let currentTooltip = null;
+
+// Helper per creare etichetta con icona info
+function labelWithInfo(text, infoText) {
+    const id = 'info-' + Math.random().toString(36).substr(2, 9);
+    return `
+        <div class="label-with-info">
+            <span>${text}</span>
+            <span class="info-icon" onclick="showTooltip(event, '${id}')" title="Clicca per maggiori informazioni">ℹ</span>
+        </div>
+        <div id="${id}" class="info-tooltip-data" style="display:none;">${infoText}</div>
+    `;
+}
+
+// Funzione per mostrare tooltip
+function showTooltip(event, dataId) {
+    event.stopPropagation();
+
+    // Chiudi tooltip precedente se esiste
+    if (currentTooltip) {
+        currentTooltip.remove();
+        currentTooltip = null;
+    }
+
+    // Ottieni il contenuto del tooltip
+    const dataElement = document.getElementById(dataId);
+    if (!dataElement) return;
+
+    const content = dataElement.textContent;
+
+    // Crea il tooltip
+    const tooltip = document.createElement('div');
+    tooltip.className = 'info-tooltip show';
+    tooltip.innerHTML = `
+        <button class="info-tooltip-close" onclick="closeTooltip(event)">×</button>
+        <div class="info-tooltip-content">${content}</div>
+    `;
+
+    document.body.appendChild(tooltip);
+    currentTooltip = tooltip;
+
+    // Posiziona il tooltip vicino al click
+    const rect = event.target.getBoundingClientRect();
+    let top = rect.bottom + 10;
+    let left = rect.left;
+
+    // Assicurati che il tooltip non esca dallo schermo
+    setTimeout(() => {
+        const tooltipRect = tooltip.getBoundingClientRect();
+
+        // Aggiusta posizione orizzontale
+        if (left + tooltipRect.width > window.innerWidth - 20) {
+            left = window.innerWidth - tooltipRect.width - 20;
+        }
+        if (left < 20) {
+            left = 20;
+        }
+
+        // Aggiusta posizione verticale
+        if (top + tooltipRect.height > window.innerHeight - 20) {
+            top = rect.top - tooltipRect.height - 10;
+        }
+
+        tooltip.style.top = top + 'px';
+        tooltip.style.left = left + 'px';
+    }, 10);
+}
+
+// Funzione per chiudere tooltip
+function closeTooltip(event) {
+    if (event) event.stopPropagation();
+    if (currentTooltip) {
+        currentTooltip.remove();
+        currentTooltip = null;
+    }
+}
+
+// Chiudi tooltip quando si clicca fuori
+document.addEventListener('click', function() {
+    closeTooltip();
+});
 
 // Funzione per mostrare il form appropriato
 function mostraFormIntervento() {
@@ -124,7 +205,7 @@ function getFormPompaDiCaloreAbbinata(mostraDefault = false) {
             </div>
 
             <div class="form-group">
-                <label>Tipologia Pompa di Calore:</label>
+                ${labelWithInfo('Tipologia Pompa di Calore', 'Tipo di pompa di calore: Aria-Acqua BT (bassa temperatura, riscaldamento a pavimento), Aria-Acqua MT (media temperatura, radiatori), Acqua-Acqua (geotermica), o Pompa a Gas (assorbimento).')}
                 <select id="pdc_tipoPDC">
                     <option value="aria-acqua_BT">Aria-Acqua Bassa Temperatura</option>
                     <option value="aria-acqua_MT">Aria-Acqua Media Temperatura</option>
@@ -135,7 +216,7 @@ function getFormPompaDiCaloreAbbinata(mostraDefault = false) {
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Potenza nominale (kW):</label>
+                    ${labelWithInfo('Potenza nominale (kW)', 'Potenza termica nominale della pompa di calore in condizioni standard. Si trova nella scheda tecnica del prodotto.')}
                     <input type="number" id="pdc_potenza" min="0" step="0.01">
                 </div>
                 <div class="form-group">
@@ -146,13 +227,13 @@ function getFormPompaDiCaloreAbbinata(mostraDefault = false) {
             </div>
 
             <div class="form-group">
-                <label>Efficienza energetica riscaldamento stagionale ηs (%):</label>
+                ${labelWithInfo('Efficienza energetica riscaldamento stagionale ηs (%)', 'Efficienza stagionale espressa in percentuale. Indica quanta energia elettrica consumata viene convertita in calore. Deve rispettare i requisiti Ecodesign.')}
                 <input type="number" id="pdc_eta_s" min="0" step="1">
                 <small id="pdc_eta-info" class="info-text"></small>
             </div>
 
             <div class="form-group">
-                <label>Spesa totale pompa di calore (€):</label>
+                ${labelWithInfo('Spesa totale pompa di calore (€)', 'Costo complessivo di acquisto e installazione della pompa di calore, IVA inclusa. Usato per calcolare il vincolo del 65% della spesa.')}
                 <input type="number" id="pdc_spesaTotale" min="0" step="0.01">
             </div>
 
@@ -198,7 +279,7 @@ function getFormA1() {
         </div>
 
         <div class="form-group">
-            <label>Tipo di Struttura:</label>
+            ${labelWithInfo('Tipo di Struttura', 'Seleziona il tipo di elemento edilizio su cui viene eseguito l\'isolamento: coperture (tetti), pavimenti o pareti verticali esterne.')}
             <select id="tipoStruttura">
                 <option value="coperture">Coperture</option>
                 <option value="pavimenti">Pavimenti</option>
@@ -207,7 +288,7 @@ function getFormA1() {
         </div>
 
         <div class="form-group">
-            <label>Zona Climatica:</label>
+            ${labelWithInfo('Zona Climatica', 'Zona climatica del comune dove si trova l\'edificio (da A=caldo a F=freddo). Determina i limiti massimi di trasmittanza e i coefficienti di calcolo.')}
             <select id="zonaClimatica">
                 ${ZONE_CLIMATICHE.map(z => `<option value="${z}">${z}</option>`).join('')}
             </select>
@@ -215,23 +296,23 @@ function getFormA1() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Trasmittanza U post-intervento (W/m²K):</label>
+                ${labelWithInfo('Trasmittanza U post-intervento (W/m²K)', 'Trasmittanza termica della struttura DOPO l\'intervento. Indica quanto calore passa attraverso la struttura. Valori più bassi = miglior isolamento. Deve rispettare i limiti di zona.')}
                 <input type="number" id="trasmittanza" min="0" step="0.01" required>
                 <small id="trasmittanza-info" class="info-text"></small>
             </div>
             <div class="form-group">
-                <label>Superficie oggetto intervento (m²):</label>
+                ${labelWithInfo('Superficie oggetto intervento (m²)', 'Superficie totale in metri quadrati su cui viene eseguito l\'intervento di isolamento termico.')}
                 <input type="number" id="superficie" min="0" step="0.01" required>
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label>Costo specifico sostenuto (€/m²):</label>
+                ${labelWithInfo('Costo specifico sostenuto (€/m²)', 'Costo dell\'intervento diviso per la superficie. Esempio: se spendi 10.000€ per 50m², il costo specifico è 200€/m².')}
                 <input type="number" id="costoSpecifico" min="0" step="0.01" required>
             </div>
             <div class="form-group">
-                <label>Spesa totale sostenuta (€):</label>
+                ${labelWithInfo('Spesa totale sostenuta (€)', 'Costo complessivo dell\'intervento, comprensivo di materiali, manodopera e IVA. Usato per calcolare il limite del 65% e verificare Imax.')}
                 <input type="number" id="spesaTotale" min="0" step="0.01" required>
             </div>
         </div>
@@ -596,11 +677,11 @@ function getFormA7() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Numero colonnine:</label>
+                ${labelWithInfo('Numero colonnine', 'Numero totale di punti di ricarica (colonnine) che verranno installati.')}
                 <input type="number" id="numeroColonnine" min="1" step="1" required>
             </div>
             <div class="form-group">
-                <label>Potenza erogabile per colonnina (kW):</label>
+                ${labelWithInfo('Potenza erogabile per colonnina (kW)', 'Potenza massima erogabile da ogni colonnina. Deve essere almeno 7,4 kW per accedere agli incentivi. Tipiche: 7,4 kW (domestico), 11 kW, 22 kW (pubblico).')}
                 <input type="number" id="potenzaColonnina" min="7.4" step="0.1" required>
                 <small class="info-text" style="color: #006B68;">Minimo: 7,4 kW</small>
             </div>
@@ -608,25 +689,25 @@ function getFormA7() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Modalità ricarica:</label>
+                ${labelWithInfo('Modalità ricarica', 'Modo 3: ricarica con cavo e controllo sicurezza (wallbox domestiche). Modo 4: ricarica rapida DC (colonnine pubbliche). Entrambi conformi CEI EN 61851.')}
                 <select id="modalitaRicarica">
                     <option value="modo3">Modo 3 (CEI EN 61851)</option>
                     <option value="modo4">Modo 4 (CEI EN 61851)</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>Costo per colonnina (€):</label>
+                ${labelWithInfo('Costo per colonnina (€)', 'Costo medio di acquisto e installazione di una singola colonnina.')}
                 <input type="number" id="costoColonnina" min="0" step="0.01" required>
             </div>
         </div>
 
         <div class="form-group">
-            <label>Spesa totale colonnine (€):</label>
+            ${labelWithInfo('Spesa totale colonnine (€)', 'Costo complessivo per tutte le colonnine (numero colonnine × costo unitario). Include hardware, installazione, opere elettriche, IVA.')}
             <input type="number" id="spesaTotale" min="0" step="0.01" required>
         </div>
 
         <div class="form-group">
-            <label>Zona Climatica (per calcolo pompa di calore):</label>
+            ${labelWithInfo('Zona Climatica (per calcolo pompa di calore)', 'Necessaria per calcolare l\'incentivo della pompa di calore abbinata (obbligatoria per le colonnine di ricarica).')}
             <select id="zonaClimatica">
                 ${ZONE_CLIMATICHE.map(z => `<option value="${z}">${z}</option>`).join('')}
             </select>
@@ -680,28 +761,28 @@ function getFormA8() {
 
         <div class="form-row">
             <div class="form-group">
-                <label>Potenza Fotovoltaico (kW):</label>
+                ${labelWithInfo('Potenza Fotovoltaico (kW)', 'Potenza di picco dell\'impianto fotovoltaico. Deve essere tra 2 kW e 1000 kW (1 MW). Si trova nella scheda tecnica dei moduli (potenza totale = potenza modulo × numero moduli).')}
                 <input type="number" id="potenzaFV" min="2" max="1000" step="0.01" required>
             </div>
             <div class="form-group">
-                <label>Spesa Fotovoltaico (€):</label>
+                ${labelWithInfo('Spesa Fotovoltaico (€)', 'Costo totale dell\'impianto fotovoltaico (moduli, inverter, strutture, installazione). Sono previsti costi massimi ammissibili in base alla potenza.')}
                 <input type="number" id="spesaFV" min="0" step="0.01" required>
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
-                <label>Capacità Accumulo (kWh):</label>
+                ${labelWithInfo('Capacità Accumulo (kWh)', 'Capacità delle batterie di accumulo (opzionale). Espressa in kWh. Se non presente, lasciare a 0.')}
                 <input type="number" id="capacitaAccumulo" min="0" step="0.01">
             </div>
             <div class="form-group">
-                <label>Spesa Accumulo (€):</label>
+                ${labelWithInfo('Spesa Accumulo (€)', 'Costo del sistema di accumulo (batterie + installazione). Lasciare a 0 se non presente. Costo massimo ammissibile: 1000€/kWh.')}
                 <input type="number" id="spesaAccumulo" min="0" step="0.01">
             </div>
         </div>
 
         <div class="form-group">
-            <label>Zona Climatica (per calcolo pompa di calore):</label>
+            ${labelWithInfo('Zona Climatica (per calcolo pompa di calore)', 'Necessaria per calcolare l\'incentivo della pompa di calore abbinata. Seleziona la zona climatica del comune.')}
             <select id="zonaClimatica">
                 ${ZONE_CLIMATICHE.map(z => `<option value="${z}">${z}</option>`).join('')}
             </select>
